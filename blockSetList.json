@@ -1,0 +1,57 @@
+[
+    {
+        name: "GrassRoad",
+        dimensions: 2,
+        blocks:[
+            {
+                name: "DecoPlatformBase",
+                north: [
+                    "openTechRoadStraight_East", "openTechRoadStraight_West", "OpenTechRoadCurve1_West", "OpenTechRoadCurve1_North", "DecoPlatformBase_North", "DecoPlatformBase_East", "DecoPlatformBase_South", "DecoPlatformBase_West"
+                ],
+                east:[
+                    "openTechRoadStraight_North", "openTechRoadStraight_South", "OpenTechRoadCurve1_North", "OpenTechRoadCurve1_East", "DecoPlatformBase_North", "DecoPlatformBase_East", "DecoPlatformBase_South", "DecoPlatformBase_West"
+                ],
+                south:[
+                    "openTechRoadStraight_East", "openTechRoadStraight_West", "OpenTechRoadCurve1_South", "OpenTechRoadCurve1_East", "DecoPlatformBase_North", "DecoPlatformBase_East", "DecoPlatformBase_South", "DecoPlatformBase_West"
+                ],
+                west:[
+                    "openTechRoadStraight_North", "openTechRoadStraight_South", "OpenTechRoadCurve1_South", "OpenTechRoadCurve1_West", "DecoPlatformBase_North", "DecoPlatformBase_East", "DecoPlatformBase_South", "DecoPlatformBase_West"
+                ]
+            },
+
+            {
+                name: "openTechRoadStraight",
+                north: [
+                    "openTechRoadStraight_North", "openTechRoadStraight_South", "OpenTechRoadCurve1_East", "OpenTechRoadCurve1_South"
+                ],
+                east:[
+                    "openTechRoadStraight_North", "openTechRoadStraight_South", "OpenTechRoadCurve1_North", "OpenTechRoadCurve1_East", "DecoPlatformBase_North", "DecoPlatformBase_East", "DecoPlatformBase_South", "DecoPlatformBase_West"
+                ],
+                south:[
+                    "openTechRoadStraight_North", "openTechRoadStraight_South", "OpenTechRoadCurve1_West", "OpenTechRoadCurve1_North"
+                ],
+                west:[
+                    "openTechRoadStraight_North", "openTechRoadStraight_South", "OpenTechRoadCurve1_South", "OpenTechRoadCurve1_West", "DecoPlatformBase_North", "DecoPlatformBase_East", "DecoPlatformBase_South", "DecoPlatformBase_West"
+                ]
+
+            },
+
+            {
+                name: "openTechRoadCurve1",
+                north: [
+                    "openTechRoadStraight_North", "openTechRoadStraight_South", "OpenTechRoadCurve1_East", "OpenTechRoadCurve1_South"
+                ],
+                east:[
+                    "openTechRoadStraight_East", "openTechRoadStraight_West", "OpenTechRoadCurve1_South", "OpenTechRoadCurve1_West"
+                ],
+                south:[
+                    "openTechRoadStraight_East", "openTechRoadStraight_North", "OpenTechRoadCurve1_East", "OpenTechRoadCurve1_South", "DecoPlatformBase_North", "DecoPlatformBase_East", "DecoPlatformBase_South", "DecoPlatformBase_West"
+                ],
+                west:[
+                    "openTechRoadStraight_North", "openTechRoadStraight_South", "OpenTechRoadCurve1_South", "OpenTechRoadCurve1_West", "DecoPlatformBase_North", "DecoPlatformBase_East", "DecoPlatformBase_South", "DecoPlatformBase_West"
+                ]
+
+            }
+
+
+            ]}]
