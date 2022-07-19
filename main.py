@@ -5,6 +5,10 @@ import random
 Y_AXIS_FOR_2D = 9
 
 
+def relative_to_absolute(baseDir, relativeDir):
+    dirs = ['North', 'East', 'South', 'West']
+    return dirs[(dirs.index(baseDir) + dirs.index(relativeDir))%4]
+
 class Block:
     name = ""
     # This lists contain the blocks' names
@@ -23,17 +27,17 @@ class Block:
 
 
 class BlockSet:
-    listBlocks = []
+    listBlocks = {}
     name = ""
     dimensions = 0
     def __init__(self, BlockSetJson):
         self.name = BlockSetJson['name']
         self.dimensions = BlockSetJson['dimensions']
         for b in BlockSetJson['blocks']:
-            self.listBlocks.append(Block(b))
+            self.listBlocks[b['name']] = Block(b)
 
     def get_all_blocks(self):
-        return self.listBlocks
+        return self.listBlocks.values()
 
     def get_all_blocks_all_dir(self):
         allblocks = self.get_all_blocks()
@@ -44,6 +48,11 @@ class BlockSet:
             allblocksalldir.append(block.name + "_South")
             allblocksalldir.append(block.name + "_West")
         return allblocksalldir
+
+    def possible_blocks_near(self, blockname, dir, basedir=None):
+        if basedir is None:
+            return self.listBlocks[blockname][dir]
+        return self.listBlocks[blockname][relative_to_absolute(basedir, dir)]
 
 
     def get_name(self):
@@ -76,7 +85,13 @@ class Stadium:
         self.tiles[coords3D].force_collapse(superposition)
 
 
-    def refresh_neighbours(self, coords3D):
+    def refresh_tile(self, coords3D):
+        # For each superposition, keep it if all neighbours have a superposition allowing it
+        # If a change was made, refresh neighbours
+
+        for superpos in self.tiles[coords3D]:
+
+
         pass
         # VERY IMPORTANT
 
@@ -121,6 +136,13 @@ class Tile:
 
     def nb_superpositions(self):
         return len(self.superpositions)
+
+    def reset_superpositions(self):
+        s = self.superpositions
+        self.superpositions = []
+        return s
+
+
 
 
     def isCollapse(self):
