@@ -3,6 +3,7 @@ import json
 import random
 
 Y_AXIS_FOR_2D = 9
+MAX_XZ_STAD = 10
 
 
 def relative_to_absolute(baseDir, relativeDir):
@@ -20,14 +21,16 @@ def rotate_block(Blockname, dir):
 
 class Block:
     name = ""
-    possibleBlocks = {}
+    possibleBlocks = None
     def __init__(self, bDict, rotation):
+        self.possibleBlocks = {}
         dirs = ['North', 'East', 'South', 'West']
         self.name = bDict['name'] + "_" + rotation
         self.possibleBlocks[relative_to_absolute("North", rotation)] = bDict['north']
         self.possibleBlocks[relative_to_absolute("East", rotation)] = bDict['east']
         self.possibleBlocks[relative_to_absolute("South", rotation)] = bDict['south']
         self.possibleBlocks[relative_to_absolute("West", rotation)] = bDict['west']
+
 
         for d in dirs:
             for i in range(len(self.possibleBlocks[d])):
@@ -38,16 +41,20 @@ class Block:
 
 
 class BlockSet:
-    listBlocks = {}
+    listBlocks = None
     name = ""
     dimensions = 0
     def __init__(self, BlockSetJson):
+        self.listBlocks = {}
         self.name = BlockSetJson['name']
         self.dimensions = BlockSetJson['dimensions']
         for b in BlockSetJson['blocks']:
             dirs = ['North', 'East', 'South', 'West']
             for d in dirs:
-                self.listBlocks[b['name']+'_'+d] = Block(b, d)
+                blocko = Block(b, d)
+                namoblocko = b['name']+'_'+d
+                self.listBlocks[namoblocko] = Block(b, d)
+
 
     def get_all_blocks(self):
         return self.listBlocks.values()
@@ -65,7 +72,7 @@ class BlockSet:
     def possible_blocks_near(self, blockname, dir, basedir=None):
         if basedir is None:
             return self.listBlocks[blockname].possibleBlocks[dir]
-        return list(map(lambda x : rotate_block(x, dir), self.listBlocks[blockname][relative_to_absolute(basedir, dir)]))
+        return list(map(lambda x : rotate_block(x, dir),   self.listBlocks[blockname].possibleBlocks[relative_to_absolute(basedir, dir)]))
 
 
 
@@ -78,14 +85,15 @@ class BlockSet:
 
 
 class Stadium:
-    tiles = {} # Key is a tuple of 3 int (coordinates)
+    tiles = None # Key is a tuple of 3 int (coordinates)
     blockSet = None
 
     def __init__(self, BlockSet):
+        self.tiles = {}
         self.blockSet = BlockSet
         if BlockSet.dimensions == 2:
-            for x in range(42):
-                for z in range(42):
+            for x in range(MAX_XZ_STAD):
+                for z in range(MAX_XZ_STAD):
                     self.add_tile((x, Y_AXIS_FOR_2D, z))
 
     def add_tile(self, coords3D):
@@ -93,7 +101,7 @@ class Stadium:
 
 
     def is_coords_out_of_stadium(self, coords):
-        return coords[0] > 41 or coords[1] > 31 or coords[2] > 41 or coords[0] < 0 or coords[1] < 9 or coords[2] < 0
+        return coords[0] > (MAX_XZ_STAD-1) or coords[1] > 31 or coords[2] > (MAX_XZ_STAD-1) or coords[0] < 0 or coords[1] < 9 or coords[2] < 0
 
 
     def get_superpositions(self, coords3D):
@@ -106,11 +114,13 @@ class Stadium:
 
     def neighbours_of_coords(self, coords3D, dimensions=3):
         listn = []
-        listn.append((coords3D[0]+1,coords3D[1], coords3D[2]))
-        listn.append((coords3D[0]-1,coords3D[1], coords3D[2]))
         if dimensions > 1:
             listn.append((coords3D[0],coords3D[1], coords3D[2]+1))
+            listn.append((coords3D[0]-1,coords3D[1], coords3D[2]))
             listn.append((coords3D[0],coords3D[1], coords3D[2]-1))
+            listn.append((coords3D[0]+1,coords3D[1], coords3D[2]))
+
+
         if dimensions > 2:
             listn.append((coords3D[0],coords3D[1]+1, coords3D[2]))
             listn.append((coords3D[0],coords3D[1]-1, coords3D[2]))
@@ -132,23 +142,23 @@ class Stadium:
             return True
 
         for b in self.tiles[coords].get_superpositions():
-            print('comparaison', blockname, self.blockSet.possible_blocks_near(b, dir))
+
             if blockname in self.blockSet.possible_blocks_near(b, dir):
+
                 return True
 
         return False
 
 
     def refresh_tile(self, coords3D):
-        print('refresh', coords3D)
         # For each superposition, keep it if all neighbours have a superposition allowing it
         # If a change was made, refresh neighbours
-        dirs = ['East', 'West', "South",'North']
+        dirs = ['North', 'East', 'South', 'West']
         keeps = []
         change = False
         for superpos in self.tiles[coords3D].get_superpositions():
             keep = True
-            idir = 0
+            idir = 2
             for n in self.neighbours_of_coords(coords3D, dimensions=2):
                 if not self.can_Block_be_at_Direction_of_Tile(superpos, dirs[idir], n):
                     keep = False
@@ -160,19 +170,14 @@ class Stadium:
 
             if keep:
                 keeps.append(superpos)
-        if change:
-            print()
-            print(keeps)
+        if change and len(keeps) > 0:
             self.tiles[coords3D].reset_superpositions(newSuperpositions=keeps)
-            print(coords3D, self.tiles[coords3D].get_superpositions())
             for n in self.neighbours_of_coords(coords3D, dimensions=2):
                 self.refresh_tile(n)
 
 
 
 
-
-        # VERY IMPORTANT
 
 
 
@@ -181,10 +186,11 @@ class Stadium:
         coordsofmin = None
         for coords in self.tiles.keys():
             if not self.tiles[coords].isCollapse() and self.tiles[coords].nb_superpositions() < min:
+
                 min = self.tiles[coords].nb_superpositions()
                 coordsofmin = coords
 
-        return coords
+        return coordsofmin
 
 
 
@@ -192,7 +198,7 @@ class Stadium:
         list = []
         t = None
         for coords in self.tiles.keys():
-            self.tiles[coords].force_collapse() # DONT KEEP THIS LINE  -----------------------  SHIT HERE
+            #self.tiles[coords].force_collapse() # DONT KEEP THIS LINE  -----------------------  SHIT HERE
             t = self.tiles[coords].toObj()
             t['Coord'] = coords
             list.append(t)
@@ -204,7 +210,6 @@ class Stadium:
 
 
         while co is not None:
-            print(co)
             self.collapse(co)
             for n in self.neighbours_of_coords(co, dimensions=2):
                 self.refresh_tile(n)
@@ -216,7 +221,7 @@ class Stadium:
 
 
 class Tile:
-    superpositions = []
+    superpositions = None
     collapse = None
 
 
@@ -330,4 +335,4 @@ def getBlocks(nameofset):
 
 if __name__ == '__main__':
     loadBlockSetList()
-    #app.run(debug=True)
+    app.run(host='127.0.0.1', port=8080,debug=True)
