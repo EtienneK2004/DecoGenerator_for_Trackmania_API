@@ -16,11 +16,12 @@ MAX_XZ_STAD = 48
 taille = (TILE_SIZE*MAX_XZ_STAD,TILE_SIZE*MAX_XZ_STAD)
 
 
-pygame.init()
-pygame.display.set_caption('Graphic Debug for Decogen')
-surface = pygame.display.set_mode(taille)
+#pygame.init()
+#pygame.display.set_caption('Graphic Debug for Decogen')
+#surface = pygame.display.set_mode(taille)
 
 def draw_block(coo, name):
+    return
     for event in pygame.event.get():
         a = 1
     co = [0,0,0]
@@ -254,10 +255,11 @@ class Stadium:
         coordsofmin = []
         k = list(self.tiles.keys())
         for co in range(len(k)):
-            if not self.tiles[k[co]].isCollapse() and self.tiles[k[co]].nb_superpositions() < min -15:
+            if not self.tiles[k[co]].isCollapse() and self.tiles[k[co]].nb_superpositions() < min + 15:
 
                 min = self.tiles[k[co]].nb_superpositions()
                 coordsofmin = [k[co]]
+                return k[co]
             elif not self.tiles[k[co]].isCollapse() and self.tiles[k[co]].nb_superpositions() < min + 15:
                 coordsofmin.append(k[co])
         if len(coordsofmin) == 0:
@@ -274,11 +276,12 @@ class Stadium:
             t = self.tiles[coords].toObj()
             t['Coord'] = coords
             list.append(t)
-        return json.dumps(list)
+
+
+        return json.dumps({"JsonBlocks": list})
 
 
     def solve(self):
-        surface.fill((0,0,0))
         co = list(self.tiles.keys())[random.randint(0, len(self.tiles.keys())-1)]
 
 
@@ -408,4 +411,4 @@ def getBlocks(nameofset):
 
 if __name__ == '__main__':
     loadBlockSetList()
-    #app.run(host='TILE_SIZE*2/37.0.0.1', port=8080,debug=True)
+    app.run(host='127.0.0.1', port=8080,debug=True)
