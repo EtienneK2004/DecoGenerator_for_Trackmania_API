@@ -1,9 +1,74 @@
 from flask import Flask
 import json
 import random
+import pygame
+from time import sleep
 
+
+
+
+
+
+TILE_SIZE = 15
 Y_AXIS_FOR_2D = 9
-MAX_XZ_STAD = 10
+MAX_XZ_STAD = 48
+
+taille = (TILE_SIZE*MAX_XZ_STAD,TILE_SIZE*MAX_XZ_STAD)
+
+
+pygame.init()
+pygame.display.set_caption('Graphic Debug for Decogen')
+surface = pygame.display.set_mode(taille)
+
+def draw_block(coo, name):
+    for event in pygame.event.get():
+        a = 1
+    co = [0,0,0]
+    co[0], co[2] = coo[0]*TILE_SIZE, coo[2]*TILE_SIZE
+
+
+    if name == None:
+        pygame.draw.rect(surface, (50,50,50), pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE))
+        return
+    name, dir = name.split('_')
+    if name == 'DecoPlatformBase':
+        r = pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE)
+        pygame.draw.rect(surface, (0,150,15), r)
+
+    if name == 'OpenTechRoadStraight':
+        if dir in ('North', 'South'):
+            r1 = pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE)
+            r2 = pygame.Rect(co[0]+TILE_SIZE/3, co[2], TILE_SIZE/3, TILE_SIZE)
+            pygame.draw.rect(surface, (0,150,15), r1)
+            pygame.draw.rect(surface, (200,200,200), r2)
+        else:
+            r1 = pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE)
+            r2 = pygame.Rect(co[0], co[2]+TILE_SIZE/3, TILE_SIZE,TILE_SIZE/3)
+            pygame.draw.rect(surface, (0,150,15), r1)
+            pygame.draw.rect(surface, (200,200,200), r2)
+
+    if name == 'OpenTechRoadCurve1':
+        r1 = pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE)
+        r2 = pygame.Rect(co[0]+TILE_SIZE/3, co[2]+TILE_SIZE/3, TILE_SIZE/3, TILE_SIZE/3)
+        pygame.draw.rect(surface, (0,150,15), r1)
+        pygame.draw.rect(surface, (200,200,200), r2)
+        if dir in ('North', 'East'):
+            r3 = pygame.Rect(co[0], co[2]+TILE_SIZE/3, TILE_SIZE/3, TILE_SIZE/3)
+            pygame.draw.rect(surface, (200,200,200), r3)
+        if dir in ('South', 'East'):
+            r3 = pygame.Rect(co[0]+TILE_SIZE/3, co[2], TILE_SIZE/3, TILE_SIZE/3)
+            pygame.draw.rect(surface, (200,200,200), r3)
+        if dir in ('South', 'West'):
+            r3 = pygame.Rect(co[0]+TILE_SIZE*2/3, co[2]+TILE_SIZE/3, TILE_SIZE/3, TILE_SIZE/3)
+            pygame.draw.rect(surface, (200,200,200), r3)
+        if dir in ('North', 'West'):
+            r3 = pygame.Rect(co[0]+TILE_SIZE/3, co[2]+TILE_SIZE*2/3, TILE_SIZE/3, TILE_SIZE/3)
+            pygame.draw.rect(surface, (200,200,200), r3)
+
+    pygame.display.flip()
+
+
+
 
 
 def relative_to_absolute(baseDir, relativeDir):
@@ -22,14 +87,15 @@ def rotate_block(Blockname, dir):
 class Block:
     name = ""
     possibleBlocks = None
-    def __init__(self, bDict, rotation):
+    def __init__(self, blDict, rotation):
+        bDict = dict(blDict)
         self.possibleBlocks = {}
         dirs = ['North', 'East', 'South', 'West']
         self.name = bDict['name'] + "_" + rotation
-        self.possibleBlocks[relative_to_absolute("North", rotation)] = bDict['north']
-        self.possibleBlocks[relative_to_absolute("East", rotation)] = bDict['east']
-        self.possibleBlocks[relative_to_absolute("South", rotation)] = bDict['south']
-        self.possibleBlocks[relative_to_absolute("West", rotation)] = bDict['west']
+        self.possibleBlocks[relative_to_absolute("North", rotation)] = list(bDict['north'])
+        self.possibleBlocks[relative_to_absolute("East", rotation)] = list(bDict['east'])
+        self.possibleBlocks[relative_to_absolute("South", rotation)] = list(bDict['south'])
+        self.possibleBlocks[relative_to_absolute("West", rotation)] = list(bDict['west'])
 
 
         for d in dirs:
@@ -53,7 +119,7 @@ class BlockSet:
             for d in dirs:
                 blocko = Block(b, d)
                 namoblocko = b['name']+'_'+d
-                self.listBlocks[namoblocko] = Block(b, d)
+                self.listBlocks[namoblocko] = blocko
 
 
     def get_all_blocks(self):
@@ -72,7 +138,7 @@ class BlockSet:
     def possible_blocks_near(self, blockname, dir, basedir=None):
         if basedir is None:
             return self.listBlocks[blockname].possibleBlocks[dir]
-        return list(map(lambda x : rotate_block(x, dir),   self.listBlocks[blockname].possibleBlocks[relative_to_absolute(basedir, dir)]))
+        #return list(map(lambda x : rotate_block(x, dir),   self.listBlocks[blockname].possibleBlocks[relative_to_absolute(basedir, dir)]))
 
 
 
@@ -110,6 +176,7 @@ class Stadium:
 
     def collapse(self, coords3D, superposition=None):
         self.tiles[coords3D].force_collapse(superposition)
+        draw_block(coords3D, self.tiles[coords3D].collapse)
 
 
     def neighbours_of_coords(self, coords3D, dimensions=3):
@@ -181,16 +248,21 @@ class Stadium:
 
 
 
+
     def find_lowest_superposition(self):
         min = len(self.blockSet.get_all_blocks())
-        coordsofmin = None
-        for coords in self.tiles.keys():
-            if not self.tiles[coords].isCollapse() and self.tiles[coords].nb_superpositions() < min:
+        coordsofmin = []
+        k = list(self.tiles.keys())
+        for co in range(len(k)):
+            if not self.tiles[k[co]].isCollapse() and self.tiles[k[co]].nb_superpositions() < min -15:
 
-                min = self.tiles[coords].nb_superpositions()
-                coordsofmin = coords
-
-        return coordsofmin
+                min = self.tiles[k[co]].nb_superpositions()
+                coordsofmin = [k[co]]
+            elif not self.tiles[k[co]].isCollapse() and self.tiles[k[co]].nb_superpositions() < min + 15:
+                coordsofmin.append(k[co])
+        if len(coordsofmin) == 0:
+            return None
+        return coordsofmin[random.randint(0, len(coordsofmin)-1)]
 
 
 
@@ -206,6 +278,7 @@ class Stadium:
 
 
     def solve(self):
+        surface.fill((0,0,0))
         co = list(self.tiles.keys())[random.randint(0, len(self.tiles.keys())-1)]
 
 
@@ -335,4 +408,4 @@ def getBlocks(nameofset):
 
 if __name__ == '__main__':
     loadBlockSetList()
-    app.run(host='127.0.0.1', port=8080,debug=True)
+    #app.run(host='TILE_SIZE*2/37.0.0.1', port=8080,debug=True)
