@@ -16,12 +16,12 @@ MAX_XZ_STAD = 48
 taille = (TILE_SIZE*MAX_XZ_STAD,TILE_SIZE*MAX_XZ_STAD)
 
 
-#pygame.init()
-#pygame.display.set_caption('Graphic Debug for Decogen')
-#surface = pygame.display.set_mode(taille)
+pygame.init()
+pygame.display.set_caption('Graphic Debug for Decogen')
+surface = pygame.display.set_mode(taille)
 
 def draw_block(coo, name):
-    return
+
     for event in pygame.event.get():
         a = 1
     co = [0,0,0]
@@ -76,6 +76,10 @@ def relative_to_absolute(baseDir, relativeDir):
     dirs = ['North', 'East', 'South', 'West']
     return dirs[(dirs.index(baseDir) + dirs.index(relativeDir))%4]
 
+def opposite_dir(dir):
+    dirs = ['North', 'East', 'Top', 'South', 'West', 'Bottom']
+    return dirs[(dirs.index(dir)+3)%6]
+
 
 def rotate_block(Blockname, dir):
 
@@ -88,21 +92,32 @@ def rotate_block(Blockname, dir):
 class Block:
     name = ""
     possibleBlocks = None
-    def __init__(self, blDict, rotation):
+    def __init__(self, blDict, rotation, blockset):
         bDict = dict(blDict)
         self.possibleBlocks = {}
         dirs = ['North', 'East', 'South', 'West']
         self.name = bDict['name'] + "_" + rotation
-        self.possibleBlocks[relative_to_absolute("North", rotation)] = list(bDict['north'])
-        self.possibleBlocks[relative_to_absolute("East", rotation)] = list(bDict['east'])
-        self.possibleBlocks[relative_to_absolute("South", rotation)] = list(bDict['south'])
-        self.possibleBlocks[relative_to_absolute("West", rotation)] = list(bDict['west'])
+        self.possibleBlocks[relative_to_absolute("North", rotation)] = self.possible_blocks_side(bDict['north'], 'North', blockset)
+        self.possibleBlocks[relative_to_absolute("East", rotation)] = self.possible_blocks_side(bDict['east'], 'East', blockset)
+        self.possibleBlocks[relative_to_absolute("South", rotation)] = self.possible_blocks_side(bDict['south'], 'South', blockset)
+        self.possibleBlocks[relative_to_absolute("West", rotation)] = self.possible_blocks_side(bDict['west'], 'West', blockset)
 
 
         for d in dirs:
             for i in range(len(self.possibleBlocks[d])):
                 self.possibleBlocks[d][i] = rotate_block(self.possibleBlocks[d][i], rotation)
 
+
+    def possible_blocks_side(self, sidename, dir, blockSetJson):
+        blocks = []
+        for block in blockSetJson['blocks']:
+            for dire in ['North', 'East', 'South', 'West']:
+                print()
+                print(block['name']+"_"+dire, dir)
+                print(block[relative_to_absolute(opposite_dir(dir), dire).lower()])
+                if block[relative_to_absolute(opposite_dir(dir), dire).lower()] == sidename:
+                    blocks.append(block['name']+"_"+dire)
+        return blocks
 
 
 
@@ -118,7 +133,7 @@ class BlockSet:
         for b in BlockSetJson['blocks']:
             dirs = ['North', 'East', 'South', 'West']
             for d in dirs:
-                blocko = Block(b, d)
+                blocko = Block(b, d, BlockSetJson)
                 namoblocko = b['name']+'_'+d
                 self.listBlocks[namoblocko] = blocko
 
@@ -140,6 +155,7 @@ class BlockSet:
         if basedir is None:
             return self.listBlocks[blockname].possibleBlocks[dir]
         #return list(map(lambda x : rotate_block(x, dir),   self.listBlocks[blockname].possibleBlocks[relative_to_absolute(basedir, dir)]))
+
 
 
 
@@ -178,6 +194,7 @@ class Stadium:
     def collapse(self, coords3D, superposition=None):
         self.tiles[coords3D].force_collapse(superposition)
         draw_block(coords3D, self.tiles[coords3D].collapse)
+
 
 
     def neighbours_of_coords(self, coords3D, dimensions=3):
@@ -411,4 +428,4 @@ def getBlocks(nameofset):
 
 if __name__ == '__main__':
     loadBlockSetList()
-    app.run(host='127.0.0.1', port=8080,debug=True)
+    # app.run(host='127.0.0.1', port=8080,debug=True)
