@@ -72,7 +72,7 @@ def draw_block(coo, name):
 
 
 
-def relative_to_absolute(baseDir, relativeDir):
+def add_dir(baseDir, relativeDir):
     dirs = ['North', 'East', 'South', 'West']
     return dirs[(dirs.index(baseDir) + dirs.index(relativeDir))%4]
 
@@ -83,7 +83,11 @@ def opposite_dir(dir):
 
 def rotate_block(Blockname, dir):
 
-    return Blockname.split('_')[0] + '_' + relative_to_absolute(Blockname.split('_')[1], dir)
+    return Blockname.split('_')[0] + '_' + add_dir(Blockname.split('_')[1], dir)
+
+def sub_dir(first, second):
+    dirs = ['North', 'East', 'South', 'West']
+    return dirs[(dirs.index(first) - dirs.index(second))%4]
 
 
 
@@ -97,10 +101,10 @@ class Block:
         self.possibleBlocks = {}
         dirs = ['North', 'East', 'South', 'West']
         self.name = bDict['name'] + "_" + rotation
-        self.possibleBlocks[relative_to_absolute("North", rotation)] = self.possible_blocks_side(bDict['north'], 'North', blockset)
-        self.possibleBlocks[relative_to_absolute("East", rotation)] = self.possible_blocks_side(bDict['east'], 'East', blockset)
-        self.possibleBlocks[relative_to_absolute("South", rotation)] = self.possible_blocks_side(bDict['south'], 'South', blockset)
-        self.possibleBlocks[relative_to_absolute("West", rotation)] = self.possible_blocks_side(bDict['west'], 'West', blockset)
+        self.possibleBlocks[add_dir("North", rotation)] = self.possible_blocks_side(bDict['north'], 'North', blockset)
+        self.possibleBlocks[add_dir("East", rotation)] = self.possible_blocks_side(bDict['east'], 'East', blockset)
+        self.possibleBlocks[add_dir("South", rotation)] = self.possible_blocks_side(bDict['south'], 'South', blockset)
+        self.possibleBlocks[add_dir("West", rotation)] = self.possible_blocks_side(bDict['west'], 'West', blockset)
 
 
         for d in dirs:
@@ -111,12 +115,9 @@ class Block:
     def possible_blocks_side(self, sidename, dir, blockSetJson):
         blocks = []
         for block in blockSetJson['blocks']:
-            for dire in ['North', 'East', 'South', 'West']:
-                print()
-                print(block['name']+"_"+dire, dir)
-                print(block[relative_to_absolute(opposite_dir(dir), dire).lower()])
-                if block[relative_to_absolute(opposite_dir(dir), dire).lower()] == sidename:
-                    blocks.append(block['name']+"_"+dire)
+            for rotation in ['North', 'East', 'South', 'West']:
+                if block[sub_dir(dir, rotation).lower()] == sidename:
+                    blocks.append(block['name']+"_"+opposite_dir(rotation))
         return blocks
 
 
@@ -154,7 +155,7 @@ class BlockSet:
     def possible_blocks_near(self, blockname, dir, basedir=None):
         if basedir is None:
             return self.listBlocks[blockname].possibleBlocks[dir]
-        #return list(map(lambda x : rotate_block(x, dir),   self.listBlocks[blockname].possibleBlocks[relative_to_absolute(basedir, dir)]))
+        #return list(map(lambda x : rotate_block(x, dir),   self.listBlocks[blockname].possibleBlocks[add_dir(basedir, dir)]))
 
 
 
