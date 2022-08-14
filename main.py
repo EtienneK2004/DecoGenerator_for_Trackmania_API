@@ -15,13 +15,15 @@ MAX_XZ_STAD = 48
 
 taille = (TILE_SIZE*MAX_XZ_STAD,TILE_SIZE*MAX_XZ_STAD)
 
-
+"""
 pygame.init()
 pygame.display.set_caption('Graphic Debug for Decogen')
 surface = pygame.display.set_mode(taille)
+"""
+
 
 def draw_block(coo, name):
-
+    return
     for event in pygame.event.get():
         a = 1
     co = [0,0,0]
