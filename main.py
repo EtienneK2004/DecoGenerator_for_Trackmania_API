@@ -65,7 +65,12 @@ def draw_block(coo, name):
         if dir in ('North', 'West'):
             r3 = pygame.Rect(co[0]+TILE_SIZE/3, co[2]+TILE_SIZE*2/3, TILE_SIZE/3, TILE_SIZE/3)
             pygame.draw.rect(surface, (200,200,200), r3)
-
+    if coo[0] == 0:
+        r = pygame.Rect(co[0], co[2], TILE_SIZE/3, TILE_SIZE/3)
+        pygame.draw.rect(surface, (255, 0, 0), r)
+    if coo[2] == 0:
+        r = pygame.Rect(co[0], co[2], TILE_SIZE/3, TILE_SIZE/3)
+        pygame.draw.rect(surface, (0, 0, 255), r)
     pygame.display.flip()
 
 
@@ -176,8 +181,8 @@ class Stadium:
         self.tiles = {}
         self.blockSet = BlockSet
         if BlockSet.dimensions == 2:
-            for x in range(MAX_XZ_STAD):
-                for z in range(MAX_XZ_STAD):
+            for x in range(-1, MAX_XZ_STAD):
+                for z in range(MAX_XZ_STAD+1):
                     self.add_tile((x, Y_AXIS_FOR_2D, z))
 
     def add_tile(self, coords3D):
@@ -185,7 +190,7 @@ class Stadium:
 
 
     def is_coords_out_of_stadium(self, coords):
-        return coords[0] > (MAX_XZ_STAD-1) or coords[1] > 31 or coords[2] > (MAX_XZ_STAD-1) or coords[0] < 0 or coords[1] < 9 or coords[2] < 0
+        return coords[0] > (MAX_XZ_STAD-1) or coords[1] > 31 or coords[2] > (MAX_XZ_STAD) or coords[0] < -1 or coords[1] < 9 or coords[2] < 0
 
 
     def get_superpositions(self, coords3D):
@@ -224,8 +229,6 @@ class Stadium:
 
 
     def can_Block_be_at_Direction_of_Tile(self, blockname, dir, coords):
-        if self.is_coords_out_of_stadium(coords):
-            return True
 
         for b in self.tiles[coords].get_superpositions():
 
@@ -291,9 +294,10 @@ class Stadium:
         t = None
         for coords in self.tiles.keys():
             #self.tiles[coords].force_collapse() # DONT KEEP THIS LINE  -----------------------  SHIT HERE
-            t = self.tiles[coords].toObj()
-            t['Coord'] = coords
-            list.append(t)
+            if not(coords[0] == -1 or coords[2] == MAX_XZ_STAD):
+                t = self.tiles[coords].toObj()
+                t['Coord'] = coords
+                list.append(t)
 
 
         return json.dumps({"JsonBlocks": list})
