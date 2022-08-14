@@ -15,6 +15,7 @@
         "blocks":[
             {
                 "name": "DecoPlatformBase",
+                "weight": 1000,
                 "north":"grass",
                 "east": "grass",
                 "south":"grass",
@@ -23,6 +24,7 @@
 
             {
                 "name": "OpenTechRoadStraight",
+                "weight": 100,
                 "north":"opentech",
                 "east": "grass",
                 "south":"opentech",
@@ -31,16 +33,116 @@
             },
 
             {
+                "name": "OpenTechRoadCheckpoint",
+                "weight": 10,
+                "north":"opentech",
+                "east": "grass",
+                "south":"opentech",
+                "west": "grass"
+            },
+
+            {
                 "name": "OpenTechRoadCurve1",
+                "weight": 100,
                 "north":"opentech",
                 "east": "opentech",
                 "south":"grass",
                 "west": "grass"
 
+            },
+            {
+                "name": "OpenTechRoadToZoneCenter",
+                "weight": 100,
+                "north":"opentech",
+                "east": "opentechright",
+                "south":"zonetech",
+                "west": "opentechleft"
+
+            },
+
+            {
+                "name": "OpenTechRoadToZoneLeft",
+                "weight": 100,
+                "north":"opentech",
+                "east": "grass",
+                "south":"opentechright",
+                "west": "opentechleft"
+
+            },
+
+            {
+                "name": "OpenTechRoadToZoneRight",
+                "weight": 100,
+                "north":"opentech",
+                "east": "opentechright",
+                "south":"opentechleft",
+                "west": "grass"
+
+            },
+
+            {
+                "name": "OpenTechZoneCurve1Out",
+                "weight": 100,
+                "north":"opentechright",
+                "east": "opentechleft",
+                "south":"grass",
+                "west": "grass"
+
+            },
+
+            {
+                "name": "OpenTechZoneCurve1In",
+                "weight": 100,
+                "north":"opentechleft",
+                "east": "opentechright",
+                "south":"zonetech",
+                "west": "zonetech"
+
+            },
+            {
+                "name": "OpenTechZoneStraight",
+                "weight": 100,
+                "north":"opentechleft",
+                "east": "grass",
+                "south":"opentechright",
+                "west": "zonetech"
+
+            },
+            {
+                "name": "OpenTechZoneBase5",
+                "weight": 100,
+                "north":"opentechleft",
+                "east": "opentechright",
+                "south":"opentechleft",
+                "west": "opentechright"
+
+            },
+            {
+                "name": "PlatformTechBase",
+                "weight": 300,
+                "north":"zonetech",
+                "east": "zonetech",
+                "south":"zonetech",
+                "west": "zonetech"
+
+            },
+            {
+                "name": "PlatformTechCheckpoint",
+                "weight": 10,
+                "north":"zonetech",
+                "east": "zonetech",
+                "south":"zonetech",
+                "west": "zonetech"
+
             }
-
-
-        ]
+        ],
+        "sockets": {
+            "grass": "grass",
+            "opentech": "opentech",
+            "opentechleft": "opentechright",
+            "opentechright": "opentechleft",
+            "zonetech": "zonetech"
+        }
     }
 
 

@@ -11,7 +11,7 @@ from time import sleep
 
 TILE_SIZE = 15
 Y_AXIS_FOR_2D = 9
-MAX_XZ_STAD = 48
+MAX_XZ_STAD = 32
 
 taille = (TILE_SIZE*MAX_XZ_STAD,TILE_SIZE*MAX_XZ_STAD)
 
@@ -102,12 +102,14 @@ def sub_dir(first, second):
 
 class Block:
     name = ""
+    weight = 0
     possibleBlocks = None
     def __init__(self, blDict, rotation, blockset):
         bDict = dict(blDict)
         self.possibleBlocks = {}
         dirs = ['North', 'East', 'South', 'West']
         self.name = bDict['name'] + "_" + rotation
+        self.weight = bDict['weight']
         self.possibleBlocks[add_dir("North", rotation)] = self.possible_blocks_side(bDict['north'], 'North', blockset)
         self.possibleBlocks[add_dir("East", rotation)] = self.possible_blocks_side(bDict['east'], 'East', blockset)
         self.possibleBlocks[add_dir("South", rotation)] = self.possible_blocks_side(bDict['south'], 'South', blockset)
@@ -123,7 +125,7 @@ class Block:
         blocks = []
         for block in blockSetJson['blocks']:
             for rotation in ['North', 'East', 'South', 'West']:
-                if block[sub_dir(dir, rotation).lower()] == sidename:
+                if block[sub_dir(dir, rotation).lower()] == blockSetJson['sockets'][sidename]:
                     blocks.append(block['name']+"_"+opposite_dir(rotation))
         return blocks
 
@@ -144,6 +146,23 @@ class BlockSet:
                 blocko = Block(b, d, BlockSetJson)
                 namoblocko = b['name']+'_'+d
                 self.listBlocks[namoblocko] = blocko
+
+
+    def get_random_block(self, listOfBlocknames):
+        listWeight = []
+        totalW = 0
+        for block in listOfBlocknames:
+            b = self.listBlocks[block]
+            listWeight.append((block, b.weight))
+            totalW += b.weight
+
+        r = random.randint(1, totalW)
+        cptW = 0
+        for block in listWeight:
+            cptW += block[1]
+            if r <= cptW:
+                return block[0]
+
 
 
     def get_all_blocks(self):
@@ -200,6 +219,8 @@ class Stadium:
 
 
     def collapse(self, coords3D, superposition=None):
+        if superposition is None:
+            superposition = self.blockSet.get_random_block(self.tiles[coords3D].get_superpositions())
         self.tiles[coords3D].force_collapse(superposition)
         draw_block(coords3D, self.tiles[coords3D].collapse)
 
@@ -273,6 +294,7 @@ class Stadium:
 
 
 
+
     def find_lowest_superposition(self):
         min = len(self.blockSet.get_all_blocks())
         coordsofmin = []
@@ -327,6 +349,8 @@ class Tile:
 
     def __init__(self, blocks):
         self.superpositions = list(blocks)
+
+
 
 
     def get_superpositions(self):
