@@ -9,9 +9,9 @@ from time import sleep
 
 
 
-TILE_SIZE = 15
+TILE_SIZE = 72
 Y_AXIS_FOR_2D = 9
-MAX_XZ_STAD = 32
+MAX_XZ_STAD = 20
 
 taille = (TILE_SIZE*MAX_XZ_STAD,TILE_SIZE*MAX_XZ_STAD)
 
@@ -20,7 +20,6 @@ pygame.init()
 pygame.display.set_caption('Graphic Debug for Decogen')
 surface = pygame.display.set_mode(taille)
 """
-
 
 def draw_block(coo, name):
     return
@@ -36,24 +35,24 @@ def draw_block(coo, name):
     name, dir = name.split('_')
     if name == 'DecoPlatformBase':
         r = pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE)
-        pygame.draw.rect(surface, (0,150,15), r)
+        pygame.draw.rect(surface, (250,150,15), r)
 
     if name == 'OpenTechRoadStraight':
         if dir in ('North', 'South'):
             r1 = pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE)
             r2 = pygame.Rect(co[0]+TILE_SIZE/3, co[2], TILE_SIZE/3, TILE_SIZE)
-            pygame.draw.rect(surface, (0,150,15), r1)
+            pygame.draw.rect(surface, (250,150,15), r1)
             pygame.draw.rect(surface, (200,200,200), r2)
         else:
             r1 = pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE)
             r2 = pygame.Rect(co[0], co[2]+TILE_SIZE/3, TILE_SIZE,TILE_SIZE/3)
-            pygame.draw.rect(surface, (0,150,15), r1)
+            pygame.draw.rect(surface, (250,150,15), r1)
             pygame.draw.rect(surface, (200,200,200), r2)
 
     if name == 'OpenTechRoadCurve1':
         r1 = pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE)
         r2 = pygame.Rect(co[0]+TILE_SIZE/3, co[2]+TILE_SIZE/3, TILE_SIZE/3, TILE_SIZE/3)
-        pygame.draw.rect(surface, (0,150,15), r1)
+        pygame.draw.rect(surface, (250,150,15), r1)
         pygame.draw.rect(surface, (200,200,200), r2)
         if dir in ('North', 'East'):
             r3 = pygame.Rect(co[0], co[2]+TILE_SIZE/3, TILE_SIZE/3, TILE_SIZE/3)
@@ -125,7 +124,7 @@ class Block:
         blocks = []
         for block in blockSetJson['blocks']:
             for rotation in ['North', 'East', 'South', 'West']:
-                if block[sub_dir(dir, rotation).lower()] == blockSetJson['sockets'][sidename]:
+                if block[sub_dir(dir, rotation).lower()] in blockSetJson['sockets'][sidename]:
                     blocks.append(block['name']+"_"+opposite_dir(rotation))
         return blocks
 
@@ -224,6 +223,9 @@ class Stadium:
         self.tiles[coords3D].force_collapse(superposition)
         draw_block(coords3D, self.tiles[coords3D].collapse)
 
+        for n in self.neighbours_of_coords(coords3D, dimensions=2):
+            self.refresh_tile(n)
+
 
 
     def neighbours_of_coords(self, coords3D, dimensions=3):
@@ -256,7 +258,6 @@ class Stadium:
         for b in self.tiles[coords].get_superpositions():
 
             if blockname in self.blockSet.possible_blocks_near(b, dir):
-
                 return True
 
         return False
@@ -300,12 +301,11 @@ class Stadium:
         coordsofmin = []
         k = list(self.tiles.keys())
         for co in range(len(k)):
-            if not self.tiles[k[co]].isCollapse() and self.tiles[k[co]].nb_superpositions() < min + 15:
+            if not self.tiles[k[co]].isCollapse() and self.tiles[k[co]].nb_superpositions() < min:
 
                 min = self.tiles[k[co]].nb_superpositions()
                 coordsofmin = [k[co]]
-                return k[co]
-            elif not self.tiles[k[co]].isCollapse() and self.tiles[k[co]].nb_superpositions() < min + 15:
+            elif not self.tiles[k[co]].isCollapse() and self.tiles[k[co]].nb_superpositions() == min:
                 coordsofmin.append(k[co])
         if len(coordsofmin) == 0:
             return None
@@ -318,10 +318,11 @@ class Stadium:
         t = None
         for coords in self.tiles.keys():
             #self.tiles[coords].force_collapse() # DONT KEEP THIS LINE  -----------------------  SHIT HERE
-            if not(coords[0] == -1 or coords[2] == MAX_XZ_STAD):
+            if not(coords[0] < 0 or coords[2] >= MAX_XZ_STAD):
                 t = self.tiles[coords].toObj()
-                t['Coord'] = coords
-                list.append(t)
+                if not t['BlockModelName'] == "":
+                    t['Coord'] = coords
+                    list.append(t)
 
 
         return json.dumps({"JsonBlocks": list})
@@ -333,8 +334,6 @@ class Stadium:
 
         while co is not None:
             self.collapse(co)
-            for n in self.neighbours_of_coords(co, dimensions=2):
-                self.refresh_tile(n)
             co = self.find_lowest_superposition()
 
 
@@ -451,7 +450,6 @@ def getBlocks(nameofset):
     stadium = Stadium(set)
 
     stadium.solve()
-
     return stadium.toJson()
 
 

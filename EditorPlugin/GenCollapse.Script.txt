@@ -20,11 +20,9 @@ K_JsonBlockList CallAPI(Text BlockSetName){
 	declare K_JsonBlockList GeneratedBlocks;
 	declare Text Response;
 	declare Request = Http.CreateGet(C_API_Url^BlockSetName, False);
-	log("On vient d'appeler");
-	wait(Request.IsCompleted);
-	log("Completed");
-	log(Request.Result);
-	
+	while(!Request.IsCompleted){
+		wait(Request.IsCompleted);
+	}
 	if (Request.StatusCode >= 200 && Request.StatusCode < 300){
 		
 		GeneratedBlocks.fromjson(Request.Result);
@@ -48,7 +46,6 @@ CMapEditorPlugin::CardinalDirections ConvertBlockDirection(Text direction) {
 
 
 Void PlaceGeneratedBlocks(K_JsonBlockList GenBlocks){
-	log("onplace");
 	foreach(gb in GenBlocks.JsonBlocks){
 		PlaceBlock(GetBlockModelFromName(gb.BlockModelName), gb.Coord, ConvertBlockDirection(gb.Dir));
 		yield;
@@ -60,9 +57,9 @@ main(){
 	
 	declare K_JsonBlockList GeneratedBlocks;
 	
-	RemoveAll();
+	
 	
 	GeneratedBlocks = CallAPI("GrassRoad");
-	log(GeneratedBlocks.JsonBlocks.count);
+	RemoveAll();
 	PlaceGeneratedBlocks(GeneratedBlocks);
 }
