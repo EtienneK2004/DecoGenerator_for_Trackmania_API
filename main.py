@@ -3,6 +3,7 @@ import json
 import random
 import pygame
 from time import sleep
+import functools
 
 
 
@@ -77,24 +78,27 @@ def draw_block(coo, name):
 
 
 
-
+@functools.cache
 def add_dir(baseDir, relativeDir):
     dirs = ['North', 'East', 'South', 'West']
     return dirs[(dirs.index(baseDir) + dirs.index(relativeDir))%4]
 
+@functools.cache
 def opposite_dir(dir):
     dirs = ['North', 'East', 'Top', 'South', 'West', 'Bottom']
     return dirs[(dirs.index(dir)+3)%6]
 
-
+@functools.cache
 def rotate_block(Blockname, dir):
 
     return Blockname.split('_')[0] + '_' + add_dir(Blockname.split('_')[1], dir)
 
+@functools.cache
 def sub_dir(first, second):
     dirs = ['North', 'East', 'South', 'West']
     return dirs[(dirs.index(first) - dirs.index(second))%4]
 
+@functools.cache
 def dir_from_coords(basecoords, coords):
     if basecoords[0] < coords[0]:
         return "West"
@@ -242,7 +246,7 @@ class Stadium:
             self.refresh_tile(n)
 
 
-
+    @functools.cache
     def neighbours_of_coords(self, coords3D, dimensions=3):
         listn = []
         if dimensions > 1:
