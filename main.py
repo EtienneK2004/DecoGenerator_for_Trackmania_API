@@ -9,10 +9,10 @@ import functools
 
 
 
-
 TILE_SIZE = 15
 Y_AXIS_FOR_2D = 9
-MAX_XZ_STAD = 48
+Y_MAX = 6
+MAX_XZ_STAD = 10
 
 taille = (TILE_SIZE*MAX_XZ_STAD,TILE_SIZE*MAX_XZ_STAD)
 
@@ -131,6 +131,10 @@ class Block:
         self.possibleBlocks[add_dir("South", rotation)] = self.possible_blocks_side(bDict['south'], 'South', blockset)
         self.possibleBlocks[add_dir("West", rotation)] = self.possible_blocks_side(bDict['west'], 'West', blockset)
 
+        if blockset["dimensions"] == 3:
+            self.possibleBlocks["Top"] = self.possible_blocks_side(bDict['top'], 'Top', blockset)
+            self.possibleBlocks["Bottom"] = self.possible_blocks_side(bDict['bottom'], 'Bottom', blockset)
+
 
         for d in dirs:
             for i in range(len(self.possibleBlocks[d])):
@@ -139,6 +143,18 @@ class Block:
 
     def possible_blocks_side(self, sidename, dir, blockSetJson):
         blocks = []
+        if dir == "Top":
+            for block in blockSetJson['blocks']:
+                if block['bottom'] in blockSetJson['sockets'][sidename]:
+                    blocks.append(block['name'] + "_" + self.name.split("_")[1])
+            return blocks
+
+        if dir == "Bottom":
+            for block in blockSetJson['blocks']:
+                if block['top'] in blockSetJson['sockets'][sidename]:
+                    blocks.append(block['name'] + "_" + self.name.split("_")[1])
+            return blocks
+
         for block in blockSetJson['blocks']:
             for rotation in ['North', 'East', 'South', 'West']:
                 if block[sub_dir(dir, rotation).lower()] in blockSetJson['sockets'][sidename]:
@@ -222,12 +238,18 @@ class Stadium:
                 for z in range(MAX_XZ_STAD):
                     self.add_tile((x, Y_AXIS_FOR_2D, z))
 
+        if BlockSet.dimensions == 3:
+            for x in range(MAX_XZ_STAD):
+                for y in range(9, 9+Y_MAX):
+                    for z in range(MAX_XZ_STAD):
+                        self.add_tile((x, y, z))
+
     def add_tile(self, coords3D):
         self.tiles[coords3D] = Tile(self.blockSet.get_all_blocknames())
 
 
     def is_coords_out_of_stadium(self, coords):
-        return coords[0] > (MAX_XZ_STAD-1) or coords[1] > 31 or coords[2] > (MAX_XZ_STAD-1) or coords[0] < 0 or coords[1] < 9 or coords[2] < 0
+        return coords[0] > (MAX_XZ_STAD-1) or coords[1] >= Y_MAX+9 or coords[2] > (MAX_XZ_STAD-1) or coords[0] < 0 or coords[1] < 9 or coords[2] < 0
 
 
     def get_superpositions(self, coords3D):
@@ -240,7 +262,7 @@ class Stadium:
 
         self.tiles[coords3D].force_collapse(superposition)
         draw_block(coords3D, self.tiles[coords3D].collapse)
-        a = self.neighbours_of_coords(coords3D, dimensions=2)
+        a = self.neighbours_of_coords(coords3D, dimensions=self.blockSet.dimensions)
 
         for n in a:
             self.refresh_tile(n)
@@ -290,7 +312,7 @@ class Stadium:
         for superpos in self.tiles[coords3D].get_superpositions():
             keep = True
             idir = 2
-            for n in self.neighbours_of_coords(coords3D, dimensions=2):
+            for n in self.neighbours_of_coords(coords3D, dimensions=self.blockSet.dimensions):
                 if not self.can_Block_be_at_Direction_of_Tile(superpos, dir_from_coords(n, coords3D), n):
 
                     keep = False
@@ -303,7 +325,7 @@ class Stadium:
                 keeps.append(superpos)
         if change and len(keeps) > 0:
             self.tiles[coords3D].reset_superpositions(newSuperpositions=keeps)
-            for n in self.neighbours_of_coords(coords3D, dimensions=2):
+            for n in self.neighbours_of_coords(coords3D, dimensions=self.blockSet.dimensions):
                 self.refresh_tile(n)
 
 
@@ -411,7 +433,7 @@ class Tile:
 
     def toObj(self):
         return {
-            'BlockModelName': self.collapse.split('_')[0],
+            'BlockModelName': self.collapse.split('_')[0].split('.')[0],
             'Dir': self.collapse.split('_')[1],
             'Coord': None, 'Color': 0, 'Mode': 'Normal'
         }

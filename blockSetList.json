@@ -125,6 +125,162 @@
             "opentechright": ["opentechleft"],
             "zonetech": ["zonetech"]
         }
+    },
+
+    {
+        "name": "GrassMountains",
+        "dimensions": 3,
+        "blocks": [
+            {
+                "name": "DecoPlatformBase",
+                "weight": 1,
+                "north":"grass",
+                "east": "grass",
+                "south":"grass",
+                "west": "grass",
+                "top": "",
+                "bottom": "wall"
+            },
+
+            {
+                "name": "DecoHillSlope2Straight.1",
+                "weight": 1,
+                "north":"wall",
+                "east": "slopewall1right",
+                "south":"grass",
+                "west": "slopewall1left",
+                "top": "DecoHillSlope2Straight.1top",
+                "bottom": "wall"
+            },
+
+            {
+                "name": ".slopestraight2",
+                "weight": 1,
+                "north":"wall",
+                "east": "slopewall2right",
+                "south":"",
+                "west": "slopewall2left",
+                "top": "DecoHillSlope2Straight.2top",
+                "bottom": "DecoHillSlope2Straight.2bottom"
+            },
+
+            {
+                "name": ".slopestraight3",
+                "weight": 1,
+                "north":"grass",
+                "east": "slopewall3right",
+                "south":"",
+                "west": "slopewall3left",
+                "top": "",
+                "bottom": "DecoHillSlope2Straight.3bottom"
+            },
+            {
+                "name": "DecoHillSlope2Curve1In.1",
+                "weight": 1,
+                "north":"slopewall1right",
+                "east": "slopewall1left",
+                "south":"wall",
+                "west": "wall",
+                "top": "DecoHillSlope2Curve1In.1top",
+                "bottom": "wall"
+            },
+            {
+                "name": ".slopecurvein2",
+                "weight": 1,
+                "north":"slopewall2right",
+                "east": "slopewall2left",
+                "south":"wall",
+                "west": "wall",
+                "top": "DecoHillSlope2Curve1In.2top",
+                "bottom": "DecoHillSlope2Curve1In.2bottom"
+            },
+            {
+                "name": ".slopecurvein3",
+                "weight": 1,
+                "north":"slopewall3right",
+                "east": "slopewall3left",
+                "south":"grass",
+                "west": "grass",
+                "top": "",
+                "bottom": "DecoHillSlope2Curve1In.3bottom"
+            },
+            {
+                "name": "DecoHillSlope2Curve1Out.1",
+                "weight": 1,
+                "north":"slopewall1left",
+                "east": "slopewall1right",
+                "south":"grass",
+                "west": "grass",
+                "top": "DecoHillSlope2Curve1Out.1top",
+                "bottom": "wall"
+            },
+            {
+                "name": ".slopecurveout2",
+                "weight": 1,
+                "north":"slopewall2left",
+                "east": "slopewall2right",
+                "south":"",
+                "west": "",
+                "top": "DecoHillSlope2Curve1Out.2top",
+                "bottom": "DecoHillSlope2Curve1Out.2bottom"
+            },
+            {
+                "name": ".slopecurveout3",
+                "weight": 1,
+                "north":"slopewall3left",
+                "east": "slopewall3right",
+                "south":"",
+                "west": "",
+                "top": "",
+                "bottom": "DecoHillSlope2Curve1Out.3bottom"
+            },
+            {
+                "name": ".wall",
+                "weight": 1,
+                "north":"wall",
+                "east": "wall",
+                "south":"wall",
+                "west": "wall",
+                "top": "wall",
+                "bottom": "wall"
+            },
+            {
+                "name": "",
+                "weight" : 1,
+                "north":"",
+                "east": "",
+                "south":"",
+                "west": "",
+                "top": "",
+                "bottom": ""
+            }
+
+        ],
+
+        "sockets":{
+            "": [""],
+            "wall": ["wall"],
+            "grass": ["grass"],
+            "slopewall3right": ["slopewall3left"],
+            "slopewall3left":["slopewall3right"],
+            "slopewall2right": ["slopewall2left"],
+            "slopewall2left":["slopewall2right"],
+            "slopewall1right": ["slopewall1left"],
+            "slopewall1left":["slopewall1right"],
+            "DecoHillSlope2Curve1Out.3bottom": ["DecoHillSlope2Curve1Out.2top"],
+            "DecoHillSlope2Curve1Out.2top": ["DecoHillSlope2Curve1Out.3bottom"],
+            "DecoHillSlope2Curve1Out.2bottom": ["DecoHillSlope2Curve1Out.1top"],
+            "DecoHillSlope2Curve1Out.1top": ["DecoHillSlope2Curve1Out.2bottom"],
+            "DecoHillSlope2Curve1In.2bottom": ["DecoHillSlope2Curve1In.1top"],
+            "DecoHillSlope2Curve1In.1top": ["DecoHillSlope2Curve1In.2bottom"],
+            "DecoHillSlope2Curve1In.3bottom": ["DecoHillSlope2Curve1In.2top"],
+            "DecoHillSlope2Curve1In.2top": ["DecoHillSlope2Curve1In.3bottom"],
+            "DecoHillSlope2Straight.2bottom": ["DecoHillSlope2Straight.1top"],
+            "DecoHillSlope2Straight.1top": ["DecoHillSlope2Straight.2bottom"],
+            "DecoHillSlope2Straight.2top": ["DecoHillSlope2Straight.3bottom"],
+            "DecoHillSlope2Straight.3bottom": ["DecoHillSlope2Straight.2top"]
+        }
+
     }
 
 

@@ -59,7 +59,7 @@ main(){
 	
 	
 	
-	GeneratedBlocks = CallAPI("GrassRoad");
+	GeneratedBlocks = CallAPI("GrassMountains");
 	RemoveAll();
 	PlaceGeneratedBlocks(GeneratedBlocks);
 }
