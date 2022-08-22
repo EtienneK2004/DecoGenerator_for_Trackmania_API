@@ -9,9 +9,9 @@ from time import sleep
 
 
 
-TILE_SIZE = 72
+TILE_SIZE = 15
 Y_AXIS_FOR_2D = 9
-MAX_XZ_STAD = 20
+MAX_XZ_STAD = 48
 
 taille = (TILE_SIZE*MAX_XZ_STAD,TILE_SIZE*MAX_XZ_STAD)
 
@@ -94,6 +94,19 @@ def rotate_block(Blockname, dir):
 def sub_dir(first, second):
     dirs = ['North', 'East', 'South', 'West']
     return dirs[(dirs.index(first) - dirs.index(second))%4]
+
+def dir_from_coords(basecoords, coords):
+    if basecoords[0] < coords[0]:
+        return "West"
+    if basecoords[1] < coords[1]:
+        return "Top"
+    if basecoords[2] < coords[2]:
+        return "North"
+    if basecoords[0] > coords[0]:
+        return "East"
+    if basecoords[1] > coords[1]:
+        return "Bottom"
+    return "South"
 
 
 
@@ -201,8 +214,8 @@ class Stadium:
         self.tiles = {}
         self.blockSet = BlockSet
         if BlockSet.dimensions == 2:
-            for x in range(-1, MAX_XZ_STAD):
-                for z in range(MAX_XZ_STAD+1):
+            for x in range(MAX_XZ_STAD):
+                for z in range(MAX_XZ_STAD):
                     self.add_tile((x, Y_AXIS_FOR_2D, z))
 
     def add_tile(self, coords3D):
@@ -210,7 +223,7 @@ class Stadium:
 
 
     def is_coords_out_of_stadium(self, coords):
-        return coords[0] > (MAX_XZ_STAD-1) or coords[1] > 31 or coords[2] > (MAX_XZ_STAD) or coords[0] < -1 or coords[1] < 9 or coords[2] < 0
+        return coords[0] > (MAX_XZ_STAD-1) or coords[1] > 31 or coords[2] > (MAX_XZ_STAD-1) or coords[0] < 0 or coords[1] < 9 or coords[2] < 0
 
 
     def get_superpositions(self, coords3D):
@@ -220,10 +233,12 @@ class Stadium:
     def collapse(self, coords3D, superposition=None):
         if superposition is None:
             superposition = self.blockSet.get_random_block(self.tiles[coords3D].get_superpositions())
+
         self.tiles[coords3D].force_collapse(superposition)
         draw_block(coords3D, self.tiles[coords3D].collapse)
+        a = self.neighbours_of_coords(coords3D, dimensions=2)
 
-        for n in self.neighbours_of_coords(coords3D, dimensions=2):
+        for n in a:
             self.refresh_tile(n)
 
 
@@ -266,20 +281,19 @@ class Stadium:
     def refresh_tile(self, coords3D):
         # For each superposition, keep it if all neighbours have a superposition allowing it
         # If a change was made, refresh neighbours
-        dirs = ['North', 'East', 'South', 'West']
         keeps = []
         change = False
         for superpos in self.tiles[coords3D].get_superpositions():
             keep = True
             idir = 2
             for n in self.neighbours_of_coords(coords3D, dimensions=2):
-                if not self.can_Block_be_at_Direction_of_Tile(superpos, dirs[idir], n):
+                if not self.can_Block_be_at_Direction_of_Tile(superpos, dir_from_coords(n, coords3D), n):
+
                     keep = False
                     change = True
                     break
 
 
-                idir = (idir+1)%4
 
             if keep:
                 keeps.append(superpos)
@@ -374,7 +388,7 @@ class Tile:
 
 
     def force_collapse(self, superposition=None):
-        if self.isCollapse():
+        if len(self.superpositions) == 0:
             self.collapse = self.superpositions[0]
             return
 
