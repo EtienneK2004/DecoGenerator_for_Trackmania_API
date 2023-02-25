@@ -4,76 +4,19 @@ import random
 import pygame
 from time import sleep
 import functools
+import sys
 
 
 
 
 
-TILE_SIZE = 15
 Y_AXIS_FOR_2D = 9
-Y_MAX = 6
-MAX_XZ_STAD = 10
+Y_MAX = 3
+MAX_XZ_STAD = 24
 
-taille = (TILE_SIZE*MAX_XZ_STAD,TILE_SIZE*MAX_XZ_STAD)
-
-"""
-pygame.init()
-pygame.display.set_caption('Graphic Debug for Decogen')
-surface = pygame.display.set_mode(taille)
-"""
-
-def draw_block(coo, name):
-    return
-    for event in pygame.event.get():
-        a = 1
-    co = [0,0,0]
-    co[0], co[2] = coo[0]*TILE_SIZE, coo[2]*TILE_SIZE
+sys.setrecursionlimit(2000)
 
 
-    if name == None:
-        pygame.draw.rect(surface, (50,50,50), pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE))
-        return
-    name, dir = name.split('_')
-    if name == 'DecoPlatformBase':
-        r = pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE)
-        pygame.draw.rect(surface, (250,150,15), r)
-
-    if name == 'OpenTechRoadStraight':
-        if dir in ('North', 'South'):
-            r1 = pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE)
-            r2 = pygame.Rect(co[0]+TILE_SIZE/3, co[2], TILE_SIZE/3, TILE_SIZE)
-            pygame.draw.rect(surface, (250,150,15), r1)
-            pygame.draw.rect(surface, (200,200,200), r2)
-        else:
-            r1 = pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE)
-            r2 = pygame.Rect(co[0], co[2]+TILE_SIZE/3, TILE_SIZE,TILE_SIZE/3)
-            pygame.draw.rect(surface, (250,150,15), r1)
-            pygame.draw.rect(surface, (200,200,200), r2)
-
-    if name == 'OpenTechRoadCurve1':
-        r1 = pygame.Rect(co[0], co[2], TILE_SIZE, TILE_SIZE)
-        r2 = pygame.Rect(co[0]+TILE_SIZE/3, co[2]+TILE_SIZE/3, TILE_SIZE/3, TILE_SIZE/3)
-        pygame.draw.rect(surface, (250,150,15), r1)
-        pygame.draw.rect(surface, (200,200,200), r2)
-        if dir in ('North', 'East'):
-            r3 = pygame.Rect(co[0], co[2]+TILE_SIZE/3, TILE_SIZE/3, TILE_SIZE/3)
-            pygame.draw.rect(surface, (200,200,200), r3)
-        if dir in ('South', 'East'):
-            r3 = pygame.Rect(co[0]+TILE_SIZE/3, co[2], TILE_SIZE/3, TILE_SIZE/3)
-            pygame.draw.rect(surface, (200,200,200), r3)
-        if dir in ('South', 'West'):
-            r3 = pygame.Rect(co[0]+TILE_SIZE*2/3, co[2]+TILE_SIZE/3, TILE_SIZE/3, TILE_SIZE/3)
-            pygame.draw.rect(surface, (200,200,200), r3)
-        if dir in ('North', 'West'):
-            r3 = pygame.Rect(co[0]+TILE_SIZE/3, co[2]+TILE_SIZE*2/3, TILE_SIZE/3, TILE_SIZE/3)
-            pygame.draw.rect(surface, (200,200,200), r3)
-    if coo[0] == 0:
-        r = pygame.Rect(co[0], co[2], TILE_SIZE/3, TILE_SIZE/3)
-        pygame.draw.rect(surface, (255, 0, 0), r)
-    if coo[2] == 0:
-        r = pygame.Rect(co[0], co[2], TILE_SIZE/3, TILE_SIZE/3)
-        pygame.draw.rect(surface, (0, 0, 255), r)
-    pygame.display.flip()
 
 
 
@@ -209,14 +152,9 @@ class BlockSet:
         return allblocknames
 
 
-
     def possible_blocks_near(self, blockname, dir, basedir=None):
         if basedir is None:
             return self.listBlocks[blockname].possibleBlocks[dir]
-        #return list(map(lambda x : rotate_block(x, dir),   self.listBlocks[blockname].possibleBlocks[add_dir(basedir, dir)]))
-
-
-
 
 
     def get_name(self):
@@ -257,15 +195,20 @@ class Stadium:
 
 
     def collapse(self, coords3D, superposition=None):
+        if(self.tiles[coords3D].collapse is not None):
+            return
         if superposition is None:
             superposition = self.blockSet.get_random_block(self.tiles[coords3D].get_superpositions())
 
         self.tiles[coords3D].force_collapse(superposition)
-        draw_block(coords3D, self.tiles[coords3D].collapse)
         a = self.neighbours_of_coords(coords3D, dimensions=self.blockSet.dimensions)
 
         for n in a:
             self.refresh_tile(n)
+        #try:
+        #    self.collapse(self.find_lowest_superposition_of_list(a))
+        #except:
+        #    pass
 
 
     @functools.cache
@@ -305,6 +248,7 @@ class Stadium:
 
 
     def refresh_tile(self, coords3D):
+
         # For each superposition, keep it if all neighbours have a superposition allowing it
         # If a change was made, refresh neighbours
         keeps = []
@@ -340,6 +284,12 @@ class Stadium:
         min = len(self.blockSet.get_all_blocks())
         coordsofmin = []
         k = list(self.tiles.keys())
+        return self.find_lowest_superposition_of_list(k)
+
+    def find_lowest_superposition_of_list(self, coordsList):
+        min = len(self.blockSet.get_all_blocks())
+        coordsofmin = []
+        k = coordsList
         for co in range(len(k)):
             if not self.tiles[k[co]].isCollapse() and self.tiles[k[co]].nb_superpositions() < min:
 
@@ -361,7 +311,10 @@ class Stadium:
             if not(coords[0] < 0 or coords[2] >= MAX_XZ_STAD):
                 t = self.tiles[coords].toObj()
                 if not t['BlockModelName'] == "":
-                    t['Coord'] = coords
+                    if self.blockSet.dimensions == 3:
+                        t['Coord'] = (coords[0], coords[1]*2-9, coords[2])
+                    else:
+                        t['Coord'] = coords
                     list.append(t)
 
 
