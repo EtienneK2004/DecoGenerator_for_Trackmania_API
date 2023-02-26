@@ -1,0 +1,15 @@
+<div>
+    <h3 class="">Result :</h3>
+    <table class="table table-sm table-dark">
+        <tbody>
+            {% for result in match.results %}
+                <tr>
+                    <th scope="row">{{result.rank}}</th>
+                    <td>{% if result.club_tag != "" %}[{{result.club_tag}}]{% endif %}{{result.username}}</td>
+                    <td>{{result.account_id}}</td>
+                    <td>{{result.score}}</td>
+                </tr>
+            {% endfor %}          
+        </tbody>
+      </table>
+</div>

@@ -1,0 +1,34 @@
+<div class="cotd-content">
+    {% if data.info %}
+        <div class="alert alert-info" role="alert">
+        Info : {{ data.info }} {{ data.message }}
+        </div>
+    {% elif data.competition %}
+        <!-- competition header -->
+        {% include 'competition/competition_header.html' %}
+
+        <!-- round header -->
+        {% include 'competition/round_header.html' %}
+
+        {% for match in data.competition.round.matches %}
+            <!-- match header -->
+            {% include 'competition/match_header.html' %}
+
+            <!-- maps header -->
+            {% for map in match.maps %}
+                {% include 'competition/match_map.html' %}
+            {% endfor %}
+
+            <!-- server header -->
+            {% if match.server %}
+            {% include 'competition/match_server.html' %}
+            {% endif %}
+
+            <!-- result header -->
+            {% include 'competition/match_result.html' %}
+
+        {% endfor %}
+   
+    {% endif %}
+</div>
+  

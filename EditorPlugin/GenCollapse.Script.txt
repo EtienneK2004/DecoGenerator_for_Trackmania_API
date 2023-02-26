@@ -1,0 +1,182 @@
+#RequireContext CMapEditorPlugin
+
+#Include "TextLib" as TextLib
+
+#Const C_API_Url "http://127.0.0.1:8000/"
+#Const C_API_Url_Generate "/generate"
+#Const C_API_Url_Build "/build/"
+
+#Const C_STATUS_CREATED 0
+#Const C_STATUS_PENDING 1
+#Const C_STATUS_FAILED 2
+#Const C_STATUS_CANCELED 3
+#Const C_STATUS_OK 4
+
+
+
+#Struct K_JsonBlock {
+    Int3 Coord;
+    Text BlockModelName;
+    Text Dir;
+		//Integer Dir;
+    Integer Color;
+		Text Mode;
+}
+
+#Struct K_JsonBlockList {
+	Text uuid;
+	Text account_id;
+	Text blockset_name;
+	Text[] subset;
+	Int3 size;
+	Integer status;
+	K_JsonBlock[] JsonBlocks;
+}
+
+
+K_JsonBlockList CallAPI(Text _BuildUuid){
+	declare K_JsonBlockList GeneratedBlocks;
+	declare Text Response;
+	declare Request = Http.CreateGet(C_API_Url^C_API_Url_Build^_BuildUuid, False);
+	while(!Request.IsCompleted){
+		wait(Request.IsCompleted);
+	}
+	if (Request.StatusCode >= 200 && Request.StatusCode < 300){
+		log("not failed.");
+		log(Request.Result);
+		
+		GeneratedBlocks.fromjson(Request.Result);
+		log("failed.");
+		
+	}
+	
+	return GeneratedBlocks;
+}
+
+CHttpRequest HttpPost(Text _address, Text _params) {
+	declare content = "";
+	
+	/*foreach (Key => Param in _params) {
+		content = """{"data" : {{{Param}}} }""";
+	}*/
+	
+	declare len = TextLib::Length(content)-1;
+	declare req = Http.CreatePost(_address, _params,"Content-Type: application/json");
+	return req;
+}
+
+CHttpRequest PostGenerateRequest(Text Message) {
+	return HttpPost(C_API_Url^C_API_Url_Generate, Message);
+}
+
+
+/*CMapEditorPlugin::CardinalDirections ConvertBlockDirection(Integer direction) {
+    switch (direction) {
+            case 0: return CMapEditorPlugin::CardinalDirections::North;
+            case 1: return CMapEditorPlugin::CardinalDirections::East;
+            case 2: return CMapEditorPlugin::CardinalDirections::South;
+            case 3: return CMapEditorPlugin::CardinalDirections::West;
+    }
+    return CMapEditorPlugin::CardinalDirections::North;
+}*/
+
+CMapEditorPlugin::CardinalDirections ConvertBlockDirection(Text direction) {
+    switch (direction) {
+            case "North": return CMapEditorPlugin::CardinalDirections::North;
+            case "East": return CMapEditorPlugin::CardinalDirections::East;
+            case "South": return CMapEditorPlugin::CardinalDirections::South;
+            case "West": return CMapEditorPlugin::CardinalDirections::West;
+    }
+    return CMapEditorPlugin::CardinalDirections::North;
+}
+
+K_JsonBlockList GenerateRequest(K_JsonBlockList _Data){
+	declare Text Data = _Data.tojson();
+	declare Request = PostGenerateRequest(Data);
+	declare Boolean Exit = False;
+	declare Boolean Dropped = False;
+	
+	log("Wait result POST");
+	while(!Exit){
+		log(Now);
+		if(Request.IsCompleted){
+			log("complete");
+			log(Request.IsCompleted);
+			log(Request.StatusCode);
+			Exit = True;
+		}
+		yield;
+	}
+	
+	declare K_JsonBlockList BlockList;
+	log("fin request POST");
+	if(Request.StatusCode >= 200 && Request.StatusCode < 300) {
+		declare Result = Request.Result;
+		
+		Http.Destroy(Request);
+		
+		BlockList.fromjson(Result);
+		log("OUAIIISIISSISI");
+		log(BlockList);
+	}
+	return BlockList;
+}
+Void PlaceGeneratedBlocks(K_JsonBlockList GenBlocks){
+	foreach(gb in GenBlocks.JsonBlocks){
+		PlaceBlock(GetBlockModelFromName(gb.BlockModelName), gb.Coord, ConvertBlockDirection(gb.Dir));
+		yield;
+	}
+}
+
+
+main(){
+	
+	declare K_JsonBlockList GeneratedBlocks;
+	declare Boolean IsLoopFinish = False;
+	declare Text uuid;
+	
+	//> clear 
+	foreach(HttpEvent in Http.PendingEvents) {
+		declare Request = HttpEvent.Request;
+		Http.Destroy(Request);
+	}
+	
+	//> POST generation
+	declare K_JsonBlockList RequestGeneration;
+	
+	RequestGeneration.account_id = LocalUser.WebServicesUserId;
+	
+	declare K_JsonBlockList result = GenerateRequest(RequestGeneration);
+	
+	log(result);
+	if(TextLib::Length(result.uuid) <= 0){
+		log("Request failed.");
+		IsLoopFinish = True;
+	}else{
+		log("Request OK. Calling API waiting for WFC to finish on uuid: "^ result.uuid);
+		uuid = result.uuid;
+	}
+	
+	while(!IsLoopFinish){
+		yield;
+		GeneratedBlocks = CallAPI(uuid);
+		if(GeneratedBlocks.status == C_STATUS_CREATED){
+			log("BuildStatus : CREATED");
+		}else if(GeneratedBlocks.status == C_STATUS_PENDING){
+			log("BuildStatus : PENDING");
+		}else{
+			log("BuildStatus : OKKKKKKKKKKKKKK");
+			IsLoopFinish = True;
+		}
+		sleep(3000);
+	}
+	
+	log("END WHILE");
+	
+	//> Wait Result	
+	//GeneratedBlocks = CallAPI("GrassRoad");
+	RemoveAll();
+	PlaceGeneratedBlocks(GeneratedBlocks);
+	
+	log("fin");
+}

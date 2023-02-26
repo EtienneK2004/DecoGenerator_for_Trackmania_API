@@ -1,0 +1,60 @@
+<div>
+    <h3 class="">{{map.name}}</h3>
+    <table class="table table-sm table-dark">
+        <tbody>
+          <tr>
+            <th scope="row">map_uid</th>
+            <td>{{map.map_uid}}</td>
+          </tr>
+          <tr>
+            <th scope="row">map_type</th>
+            <td>{{map.map_type}}</td>
+          </tr>
+          <tr>
+            <th scope="row">name</th>
+            <td>{{map.name}}</td>
+          </tr>
+          <tr>
+            <th scope="row">author_score</th>
+            <td>{{map.author_score}}</td>
+          </tr>
+          <tr>
+            <th scope="row">gold_score</th>
+            <td>{{map.gold_score}}</td>
+          </tr>
+          <tr>
+            <th scope="row">silver_score</th>
+            <td>{{map.silver_score}}</td>
+          </tr>
+          <tr>
+            <th scope="row">bronze_score</th>
+            <td>{{map.bronze_score}}</td>
+          </tr>
+          <tr>
+            <th scope="row">collection_name</th>
+            <td>{{map.collection_name}}</td>
+          </tr>
+          <tr>
+            <th scope="row">file_name</th>
+            <td>{{map.file_name}}</td>
+          </tr>
+          <tr>
+            <th scope="row">file_url</th>
+            <td><a href="{{map.file_url}}" target="_blank">{{map.file_url}}</a></td>
+          </tr>
+          <tr>
+            <th scope="row">thumbnail_url</th>
+            <td><a href="{{map.thumbnail_url}}" target="_blank">{{map.thumbnail_url}}</a></td>
+          </tr>
+          <tr>
+            <th scope="row">thumbnail</th>
+            <td><img width="300" src="{{map.thumbnail_url}}" alt="thumbnail image"></td>
+          </tr>
+          <tr>
+            <th scope="row">author</th>
+            <td>{{map.author.account_id}} // {{map.author.username}}</td>
+          </tr>
+          
+        </tbody>
+      </table>
+</div>

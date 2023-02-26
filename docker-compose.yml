@@ -1,0 +1,41 @@
+version: "3"
+   
+services:
+  psql:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - 5432:5432
+    volumes:
+      - ./data/database:/var/lib/postgresql/data
+
+  web_python:
+    build:
+      context: ./web
+    volumes:
+      - ./web:/usr/src/app
+      - ./data/files:/usr/files
+    ports:
+      - 8000:80
+    depends_on:
+      - psql
+    environment: 
+      - PYTHONUNBUFFERED=1
+
+  wfc:
+    build:
+      context: ./wfc
+    volumes:
+      - ./wfc/server:/usr/src/app
+      - ./data/files:/usr/files
+    depends_on:
+      - psql
+    environment: 
+      - PYTHONUNBUFFERED=1
+
+
+
+

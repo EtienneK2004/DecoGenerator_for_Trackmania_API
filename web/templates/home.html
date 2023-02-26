@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block navbar %}
+    {% include 'nav-authent.html' %}
+{% endblock %}
+
+{% block content %}
+        <div class="container">
+            <div class="row justify-content-md-center">
+                <div class="col-lg-7">
+                    {% include 'form_get_cotd.html' %}
+                </div>
+              </div>
+           
+        </div>
+        <div class="container">
+           
+            {% include 'content.html' %}
+       
+        </div>
+{% endblock %}

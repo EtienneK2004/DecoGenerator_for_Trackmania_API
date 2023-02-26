@@ -1,0 +1,45 @@
+<form method="POST" action="/home">
+    
+
+  <div class="dates mb-3">
+    <label for="datepick" class="font-weight-bold">COTD date: </label>
+    <input type="text" class="form-control datepick" id="datepick" name="cotd_date" placeholder="dd-mm-yyyy" autocomplete="off" >
+  </div>
+
+  <div class="mb-3">
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <label class="input-group-text font-weight-bold" for="roundnumber">Round Number</label>
+        </div>
+        <select class="custom-select" id="roundnumber" name="roundnumber" required>
+          <option value="1">1 (first COTD)</option>
+          <option value="2">2 (rerun at 3am)</option>
+          <option value="3">3 (rerun at 11am)</option>
+        </select>
+      </div>
+    </div>
+  
+    <div class="mb-3">
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <label class="input-group-text font-weight-bold" for="division">Division</label>
+        </div>
+        <select class="custom-select" id="division" name="division" required>
+          <option value="1">Div 1</option>
+          <option value="2">Div 2</option>
+          <option value="3">Div 3</option>
+        </select>
+      </div>
+    </div>
+  
+    <button type="submit" class="btn btn-primary font-weight-bold">Load</button>
+  </form>
+
+  <script>
+    $(function() {
+    $('.dates #datepick').datepicker({
+        'format': 'dd-mm-yyyy',
+        'autoclose': true
+    });
+    });
+    </script>
