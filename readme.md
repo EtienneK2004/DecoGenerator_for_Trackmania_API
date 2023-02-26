@@ -1,12 +1,9 @@
-# ensiie-nosql
+# DecoGenerator_for_Trackmania_API
+ This is meant to be used by the [corresponding editor plugin written in ManiaScript](./EditorPlugin/GenCollapse.Script.txt).
+ 
+ The script is located in [/EditorPlugin/](./EditorPlugin) .
 
-## ToutDoux-QL un petit outil pour TODOs
+`docker compose build --no-cache`
+`docker-compose up -d`
 
-Démarrer avec `docker-compose up`.
-Vous avez accès à :
-- Redis
-- Postgres
-- Neo4j
-- MongoDB
-
-Testez sur `localhost:8001/`.
+`localhost:8000/`
