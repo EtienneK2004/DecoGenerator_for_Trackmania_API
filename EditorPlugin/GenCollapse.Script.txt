@@ -5,6 +5,7 @@
 #Const C_API_Url "http://127.0.0.1:8000/"
 #Const C_API_Url_Generate "/generate"
 #Const C_API_Url_Build "/build/"
+#Const C_API_DELAI_RETRY 3000
 
 #Const C_STATUS_CREATED 0
 #Const C_STATUS_PENDING 1
@@ -15,8 +16,16 @@
 //#Const C_FIXED_BUILD "5df52f0b-ad42-4652-b000-e38e0077b472"
 #Const C_FIXED_BUILD ""
 
+#Const C_LOADING_SCREEN_REFRESH 250
 #Const C_LOADING_SCREEN """
-[{"b": "DecoHillSlope2Straight", "d": "South", "v": [0, 19, 7], "c": 0, "m": "Normal"}, 
+{
+	"Frames":[
+		{"JsonBlocks":[{"b": "DecoHillSlope2Straight", "d": "2", "v": [24, 20, 25], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoHillSlope2Straight", "d": "3", "v": [24, 20, 24], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoHillSlope2Straight", "d": "0", "v": [25, 20, 24], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoHillSlope2Straight", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""}]}
+	]
+}
 """
 
 #Struct K_JsonBlock {
@@ -38,23 +47,58 @@
 	K_JsonBlock[] JsonBlocks;
 }
 
-#Struct K_ScreenFrame {
-	K_JsonBlock[] JsonBlocks;
+#Struct K_ScreenFrameList {
+	K_JsonBlockList[] Frames;
 }
 
-declare K_ScreenFrame[] G_LoadingScreenFrames;
+declare Integer G_LastAPICallTimeStamp;
+declare K_ScreenFrameList G_LoadingScreenFrames;
 declare Integer G_NextFrame;
+declare Integer G_LoadingScreenLastRefreshTimeStamp;
 
+CMapEditorPlugin::CardinalDirections ConvertBlockDirection(Integer direction) {
+    switch (direction) {
+            case 0: return CMapEditorPlugin::CardinalDirections::North;
+            case 1: return CMapEditorPlugin::CardinalDirections::East;
+            case 2: return CMapEditorPlugin::CardinalDirections::South;
+            case 3: return CMapEditorPlugin::CardinalDirections::West;
+    }
+    return CMapEditorPlugin::CardinalDirections::North;
+}
 
 Void EreaseLoadingScreen(){
 	//> remove last frame placed
+	declare Integer LastFrame = G_NextFrame - 1;
+	if(LastFrame < 0){
+		LastFrame = G_LoadingScreenFrames.Frames.count - 1;
+	}
+	foreach(block in G_LoadingScreenFrames.Frames[LastFrame].JsonBlocks){
+		//RemoveBlock(block.v);
+		RemoveGhostBlock(GetBlockModelFromName(block.b), block.v, ConvertBlockDirection(block.d));
+	}
 }
 
 Void RefreshLoadingScreen(){
-	//> remove last frame
-	//> add next frame
-	//> yield
+	if(G_LoadingScreenLastRefreshTimeStamp + C_LOADING_SCREEN_REFRESH >= Now){
+		return;
+	}
+	G_LoadingScreenLastRefreshTimeStamp = Now;
+	
+	EreaseLoadingScreen();
+	foreach(block in G_LoadingScreenFrames.Frames[G_NextFrame].JsonBlocks){
+		log("place");
+		log(block.v);
+		PlaceGhostBlock(GetBlockModelFromName(block.b), block.v, ConvertBlockDirection(block.d));
+	}
+	
+	G_NextFrame += 1;
+	if(G_NextFrame >= G_LoadingScreenFrames.Frames.count){
+		G_NextFrame = 0;
+	}
 }
+
+
+
 
 
 K_JsonBlockList CallAPI(Text _BuildUuid){
@@ -66,7 +110,7 @@ K_JsonBlockList CallAPI(Text _BuildUuid){
 	}
 	if (Request.StatusCode >= 200 && Request.StatusCode < 300){
 		log("not failed.");
-		log(Request.Result);
+		//log(Request.Result);
 		
 		GeneratedBlocks.fromjson(Request.Result);
 		log("failed.");
@@ -92,16 +136,6 @@ CHttpRequest PostGenerateRequest(Text Message) {
 	return HttpPost(C_API_Url^C_API_Url_Generate, Message);
 }
 
-
-CMapEditorPlugin::CardinalDirections ConvertBlockDirection(Integer direction) {
-    switch (direction) {
-            case 0: return CMapEditorPlugin::CardinalDirections::North;
-            case 1: return CMapEditorPlugin::CardinalDirections::East;
-            case 2: return CMapEditorPlugin::CardinalDirections::South;
-            case 3: return CMapEditorPlugin::CardinalDirections::West;
-    }
-    return CMapEditorPlugin::CardinalDirections::North;
-}
 
 /*CMapEditorPlugin::CardinalDirections ConvertBlockDirection(Text direction) {
     switch (direction) {
@@ -139,7 +173,7 @@ K_JsonBlockList GenerateRequest(K_JsonBlockList _Data){
 		
 		BlockList.fromjson(Result);
 		log("OUAIIISIISSISI");
-		log(BlockList);
+		//log(BlockList);
 	}
 	Http.Destroy(Request);
 	return BlockList;
@@ -158,6 +192,14 @@ main(){
 	declare Boolean IsLoopFinish = False;
 	declare Text uuid;
 	
+	//> init loading
+	log("G_LoadingScreenFrames");
+	G_LoadingScreenFrames.fromjson(C_LOADING_SCREEN);
+	
+	log(G_LoadingScreenFrames);
+	G_NextFrame = 0;
+	RemoveAll();
+	
 	//> clear 
 	foreach(HttpEvent in Http.PendingEvents) {
 		declare Request = HttpEvent.Request;
@@ -174,7 +216,7 @@ main(){
 		
 		declare K_JsonBlockList result = GenerateRequest(RequestGeneration);
 		
-		log(result);
+		//log(result);
 		if(TextLib::Length(result.uuid) <= 0){
 			log("Request failed.");
 			IsLoopFinish = True;
@@ -186,6 +228,15 @@ main(){
 	
 	while(!IsLoopFinish){
 		yield;
+		RefreshLoadingScreen();
+		
+		//> skip the API call for a given delay
+		if(G_LastAPICallTimeStamp + C_API_DELAI_RETRY >= Now){
+			continue;
+		}
+		G_LastAPICallTimeStamp = Now;
+		
+		//> try to get the result of the build
 		GeneratedBlocks = CallAPI(uuid);
 		if(GeneratedBlocks.status == C_STATUS_CREATED){
 			log("BuildStatus : CREATED");
@@ -195,7 +246,6 @@ main(){
 			log("BuildStatus : OKKKKKKKKKKKKKK");
 			IsLoopFinish = True;
 		}
-		sleep(3000);
 	}
 	
 	
