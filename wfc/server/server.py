@@ -2,7 +2,7 @@ import time
 import requests
 
 import config
-import wfc
+import wfc3d
 
 
 #in seconds
@@ -36,9 +36,14 @@ def postUpdateBuild(uuid, status):
         print(str(result.status_code))
     return result.json()
 
+
+### main
+
 # maintenant faut coder ce truc
 current_build_uuid = ""
 current_build_file = ""
+
+print("starting")
 
 while(True):
     time.sleep(SLEEP_DELAY)
@@ -67,7 +72,8 @@ while(True):
 
     #run WFC
     print(">> run WFC.")
-    result = wfc.run("GrassRoad")
+    #result = wfc3d.run("GrassRoad")
+    result = wfc3d.run("GrassMountains")
     #time.sleep(10) #fake wfc
 
     #write result to file

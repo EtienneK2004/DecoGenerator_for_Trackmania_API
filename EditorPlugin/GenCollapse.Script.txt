@@ -12,15 +12,20 @@
 #Const C_STATUS_CANCELED 3
 #Const C_STATUS_OK 4
 
+//#Const C_FIXED_BUILD "5df52f0b-ad42-4652-b000-e38e0077b472"
+#Const C_FIXED_BUILD ""
 
+#Const C_LOADING_SCREEN """
+[{"b": "DecoHillSlope2Straight", "d": "South", "v": [0, 19, 7], "c": 0, "m": "Normal"}, 
+"""
 
 #Struct K_JsonBlock {
-    Int3 Coord;
-    Text BlockModelName;
-    Text Dir;
-		//Integer Dir;
-    Integer Color;
-		Text Mode;
+    Int3 v; //Coord / verctor
+    Text b; //BlockModelName
+    //Text d; //Dir
+		Integer d; //Dir
+    Integer c; //Color
+		Text m; //Mode (normal/airmode/mixmapping)
 }
 
 #Struct K_JsonBlockList {
@@ -31,6 +36,24 @@
 	Int3 size;
 	Integer status;
 	K_JsonBlock[] JsonBlocks;
+}
+
+#Struct K_ScreenFrame {
+	K_JsonBlock[] JsonBlocks;
+}
+
+declare K_ScreenFrame[] G_LoadingScreenFrames;
+declare Integer G_NextFrame;
+
+
+Void EreaseLoadingScreen(){
+	//> remove last frame placed
+}
+
+Void RefreshLoadingScreen(){
+	//> remove last frame
+	//> add next frame
+	//> yield
 }
 
 
@@ -49,7 +72,7 @@ K_JsonBlockList CallAPI(Text _BuildUuid){
 		log("failed.");
 		
 	}
-	
+	Http.Destroy(Request);
 	return GeneratedBlocks;
 }
 
@@ -70,7 +93,7 @@ CHttpRequest PostGenerateRequest(Text Message) {
 }
 
 
-/*CMapEditorPlugin::CardinalDirections ConvertBlockDirection(Integer direction) {
+CMapEditorPlugin::CardinalDirections ConvertBlockDirection(Integer direction) {
     switch (direction) {
             case 0: return CMapEditorPlugin::CardinalDirections::North;
             case 1: return CMapEditorPlugin::CardinalDirections::East;
@@ -78,9 +101,9 @@ CHttpRequest PostGenerateRequest(Text Message) {
             case 3: return CMapEditorPlugin::CardinalDirections::West;
     }
     return CMapEditorPlugin::CardinalDirections::North;
-}*/
+}
 
-CMapEditorPlugin::CardinalDirections ConvertBlockDirection(Text direction) {
+/*CMapEditorPlugin::CardinalDirections ConvertBlockDirection(Text direction) {
     switch (direction) {
             case "North": return CMapEditorPlugin::CardinalDirections::North;
             case "East": return CMapEditorPlugin::CardinalDirections::East;
@@ -88,7 +111,7 @@ CMapEditorPlugin::CardinalDirections ConvertBlockDirection(Text direction) {
             case "West": return CMapEditorPlugin::CardinalDirections::West;
     }
     return CMapEditorPlugin::CardinalDirections::North;
-}
+}*/
 
 K_JsonBlockList GenerateRequest(K_JsonBlockList _Data){
 	declare Text Data = _Data.tojson();
@@ -113,17 +136,17 @@ K_JsonBlockList GenerateRequest(K_JsonBlockList _Data){
 	if(Request.StatusCode >= 200 && Request.StatusCode < 300) {
 		declare Result = Request.Result;
 		
-		Http.Destroy(Request);
 		
 		BlockList.fromjson(Result);
 		log("OUAIIISIISSISI");
 		log(BlockList);
 	}
+	Http.Destroy(Request);
 	return BlockList;
 }
 Void PlaceGeneratedBlocks(K_JsonBlockList GenBlocks){
 	foreach(gb in GenBlocks.JsonBlocks){
-		PlaceBlock(GetBlockModelFromName(gb.BlockModelName), gb.Coord, ConvertBlockDirection(gb.Dir));
+		PlaceBlock(GetBlockModelFromName(gb.b), gb.v, ConvertBlockDirection(gb.d));
 		yield;
 	}
 }
@@ -141,20 +164,24 @@ main(){
 		Http.Destroy(Request);
 	}
 	
-	//> POST generation
-	declare K_JsonBlockList RequestGeneration;
-	
-	RequestGeneration.account_id = LocalUser.WebServicesUserId;
-	
-	declare K_JsonBlockList result = GenerateRequest(RequestGeneration);
-	
-	log(result);
-	if(TextLib::Length(result.uuid) <= 0){
-		log("Request failed.");
-		IsLoopFinish = True;
+	if(TextLib::Length(C_FIXED_BUILD) > 0){
+		uuid = C_FIXED_BUILD;
 	}else{
-		log("Request OK. Calling API waiting for WFC to finish on uuid: "^ result.uuid);
-		uuid = result.uuid;
+		//> POST generation
+		declare K_JsonBlockList RequestGeneration;
+		
+		RequestGeneration.account_id = LocalUser.WebServicesUserId;
+		
+		declare K_JsonBlockList result = GenerateRequest(RequestGeneration);
+		
+		log(result);
+		if(TextLib::Length(result.uuid) <= 0){
+			log("Request failed.");
+			IsLoopFinish = True;
+		}else{
+			log("Request OK. Calling API waiting for WFC to finish on uuid: "^ result.uuid);
+			uuid = result.uuid;
+		}
 	}
 	
 	while(!IsLoopFinish){
@@ -170,6 +197,7 @@ main(){
 		}
 		sleep(3000);
 	}
+	
 	
 	log("END WHILE");
 	
