@@ -7,9 +7,9 @@ import sys
 
 
 
-Y_AXIS_FOR_2D = 9
+Y_AXIS_FOR_2D = 20
 Y_MAX = 9
-MAX_XZ_STAD = 10
+MAX_XZ_STAD = 25
 
 sys.setrecursionlimit(2000)
 

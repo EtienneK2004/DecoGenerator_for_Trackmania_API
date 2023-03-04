@@ -13,17 +13,54 @@
 #Const C_STATUS_CANCELED 3
 #Const C_STATUS_OK 4
 
-//#Const C_FIXED_BUILD "5df52f0b-ad42-4652-b000-e38e0077b472"
+//#Const C_FIXED_BUILD "0afae6b7-1b81-41f6-bc80-9edc24540684"
 #Const C_FIXED_BUILD ""
 
-#Const C_LOADING_SCREEN_REFRESH 250
+#Const C_LOADING_SCREEN_REFRESH 150 //> 250 is pretty good
+/*#Const C_LOADING_SCREEN """
+{
+	"Frames":[
+		
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""}]},
+		
+		{"JsonBlocks":[{"b": "RoadWaterCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "RoadWaterCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "RoadWaterCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "RoadWaterCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""}]}
+		
+	]
+}
+"""*/
+
+
+//> each frames contains a block list. At each refresh, last frame is remove and the new one is placed. This is why there is duplicates
 #Const C_LOADING_SCREEN """
 {
 	"Frames":[
-		{"JsonBlocks":[{"b": "DecoHillSlope2Straight", "d": "2", "v": [24, 20, 25], "c": 0, "m": ""}]},
-		{"JsonBlocks":[{"b": "DecoHillSlope2Straight", "d": "3", "v": [24, 20, 24], "c": 0, "m": ""}]},
-		{"JsonBlocks":[{"b": "DecoHillSlope2Straight", "d": "0", "v": [25, 20, 24], "c": 0, "m": ""}]},
-		{"JsonBlocks":[{"b": "DecoHillSlope2Straight", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""}]}
+		
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""}]},
+		
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "2", "v": [23, 21, 25], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "2", "v": [23, 21, 25], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "3", "v": [23, 21, 23], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "2", "v": [23, 21, 25], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "3", "v": [23, 21, 23], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "0", "v": [25, 21, 23], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "2", "v": [23, 21, 25], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "3", "v": [23, 21, 23], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "0", "v": [25, 21, 23], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "1", "v": [25, 21, 25], "c": 0, "m": ""}]},
+		
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "3", "v": [23, 21, 23], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "0", "v": [25, 21, 23], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "1", "v": [25, 21, 25], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "0", "v": [25, 21, 23], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "1", "v": [25, 21, 25], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""},{"b": "RoadWaterCurve2", "d": "1", "v": [25, 21, 25], "c": 0, "m": ""}]},
+		
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "2", "v": [23, 20, 25], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "3", "v": [23, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "0", "v": [25, 20, 23], "c": 0, "m": ""},{"b": "DecoWallCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""}]},
+		{"JsonBlocks":[{"b": "DecoWallCurve2", "d": "1", "v": [25, 20, 25], "c": 0, "m": ""}]},
+		{"JsonBlocks":[]}
+		
 	]
 }
 """
@@ -196,7 +233,7 @@ main(){
 	log("G_LoadingScreenFrames");
 	G_LoadingScreenFrames.fromjson(C_LOADING_SCREEN);
 	
-	log(G_LoadingScreenFrames);
+	//log(G_LoadingScreenFrames);
 	G_NextFrame = 0;
 	RemoveAll();
 	
