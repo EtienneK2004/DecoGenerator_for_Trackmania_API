@@ -56,3 +56,6 @@ class Tile:
             'd': self.collapse.split('_')[1],
             'v': None, 'c': 0, 'm': 'Normal'
         }
+
+    def __str__(self):
+        return "{len superpositions : "+str(len(self.superpositions))+"}"
