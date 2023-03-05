@@ -1,12 +1,9 @@
 import random
 import json
-from models.Tile import Tile
 
 # for all generation
 MAX_XZ_STAD = 48 # size on x + z
-
-# for 2D
-Y_AXIS_FOR_2D = 1 # ground level for 2 dimension blockset only
+Y_AXIS_GROUND_LVL = 10 # ground level for 2 dimension blockset only
 
 # for 3D
 Y_MAX = 9 # max height of the build
@@ -32,6 +29,7 @@ def dir_from_coords(basecoords, x, y, z):
 class Stadium:
     tiles = None # 3d array. The tm covertion is at the render for Y Axis
     blockSet = None
+    all_blocks = None
     y_max = 1
     nb_superpositions = 0
 
@@ -39,96 +37,74 @@ class Stadium:
         self.tiles = []
         self.blockSet = BlockSet
         self.nb_superpositions = len(self.blockSet.get_all_blocks())
+        self.all_blocks = self.blockSet.get_all_blocknames()
 
         if(self.blockSet.dimensions == 3):
             self.y_max = Y_MAX
 
-        self.tiles = [[[Tile(self.blockSet.get_all_blocknames()) for y in range(self.y_max)] for z in range(MAX_XZ_STAD)] for x in range(MAX_XZ_STAD)]
-
+        self.tiles = [[[[True for i in range(self.nb_superpositions)] for y in range(self.y_max)] for z in range(MAX_XZ_STAD)] for x in range(MAX_XZ_STAD)]
 
     def is_coords_out_of_stadium(self, coords):
-        return coords[0] > (MAX_XZ_STAD-1) or coords[1] >= Y_MAX or coords[2] > (MAX_XZ_STAD-1) or coords[0] < 0 or coords[1] < 0 or coords[2] < 0
-
-
-    def get_superpositions(self, x, y, z):
-        return self.tiles[x][z][y].get_superpositions()
-
-
-    def collapse(self, x, y, z, superposition=None):
-        if(self.tiles[x][z][y].collapse is not None):
-            return
-        if superposition is None:
-            superposition = self.blockSet.get_random_block(self.tiles[x][z][y].get_superpositions())
-
-        self.tiles[x][z][y].force_collapse(superposition)
-        a = self.neighbours_of_coords(x, y, z)
-
-        for n in a:
-            self.refresh_tile(n)
-        #try:
-        #    self.collapse(self.find_lowest_superposition_of_list(a))
-        #except:
-        #    pass
-
+        return coords[0] > (MAX_XZ_STAD-1) or coords[1] >= self.y_max or coords[2] > (MAX_XZ_STAD-1) or coords[0] < 0 or coords[1] < 0 or coords[2] < 0
 
     def neighbours_of_coords(self, x, y, z):
         dimensions = self.blockSet.dimensions
         listn = []
         if dimensions > 1:
-            listn.append((x,   y, z+1))
-            listn.append((x-1, y, z  ))
-            listn.append((x,   y, z-1))
-            listn.append((x+1, y, z  ))
-
+            i = (x,   y, z+1)
+            if not self.is_coords_out_of_stadium(i) : listn.append(i)
+            i = (x-1, y, z  )
+            if not self.is_coords_out_of_stadium(i) : listn.append(i)
+            i = (x,   y, z-1)
+            if not self.is_coords_out_of_stadium(i) : listn.append(i)
+            i = (x+1, y, z  )
+            if not self.is_coords_out_of_stadium(i) : listn.append(i)
 
         if dimensions > 2:
-            listn.append((x, y+1, z))
-            listn.append((x, y-1, z))
-
-        rmv = []
-
-        for i in listn:
-            if self.is_coords_out_of_stadium(i):
-                rmv.append(i)
-
-        for i in rmv:
-            listn.remove(i)
+            i = (x, y+1, z)
+            if not self.is_coords_out_of_stadium(i) : listn.append(i)
+            i = (x, y-1, z)
+            if not self.is_coords_out_of_stadium(i) : listn.append(i)
 
         return listn
 
-
     def can_Block_be_at_Direction_of_Tile(self, blockname, dir, coords):
         x,y,z = coords[0],coords[1],coords[2]
-        for b in self.tiles[x][z][y].get_superpositions():
 
-            if blockname in self.blockSet.possible_blocks_near(b, dir):
+        poss = [b for b, c in enumerate(self.tiles[x][z][y]) if c ]
+
+        for b in poss:
+            if blockname in self.blockSet.possible_blocks_near(self.all_blocks[b], dir): #TODO :check values
                 return True
 
         return False
-
 
     def refresh_tile(self, coords3D):
         x,y,z = coords3D[0],coords3D[1],coords3D[2]
         # For each superposition, keep it if all neighbours have a superposition allowing it
         # If a change was made, refresh neighbours
         keeps = []
+        disables = []
         change = False
-        for superpos in self.tiles[x][z][y].get_superpositions():
+        superpos_index = [ superpos for superpos, c in enumerate(self.tiles[x][z][y]) if c ]
+        for superpos in superpos_index: #superpos is only indexes of True superpositions
             keep = True
             idir = 2
             for n in self.neighbours_of_coords(x,y,z):
-                if not self.can_Block_be_at_Direction_of_Tile(superpos, dir_from_coords(n, x,y,z), n): # can place superposition by dir
+                if not self.can_Block_be_at_Direction_of_Tile(self.all_blocks[superpos], dir_from_coords(n, x,y,z), n): # can place superposition by dir #TODO check le truc #block index can be given to the function
                     keep = False
                     change = True
                     break
 
-            if keep:
-                keeps.append(superpos)
-        if change and len(keeps) > 0:
-            self.tiles[x][z][y].reset_superpositions(newSuperpositions=keeps)
+            if not keep:
+                disables.append(superpos)
+
+        # remove all not possible superposition
+        if change and disables : #TODO check if change can be removed
+            for disable in disables:
+                self.tiles[x][z][y][disable] = False
             for n in self.neighbours_of_coords(x,y,z):
                 self.refresh_tile(n)
-
 
     def find_lowest_superposition(self):
         min = self.nb_superpositions
@@ -137,23 +113,40 @@ class Stadium:
         for x in range(MAX_XZ_STAD):
             for z in range(MAX_XZ_STAD):
                 for y in range(self.y_max):
-                    if not self.tiles[x][z][y].isCollapse() and self.tiles[x][z][y].nb_superpositions() < min:
-                        min = self.tiles[x][z][y].nb_superpositions()
+                    if sum(self.tiles[x][z][y]) > 1 and sum(self.tiles[x][z][y]) < min: #TODO : probably optimise sum and collapse
+                        #>>> a = [True, False, True]
+                        #>>> sum(a) -> output : 2
+                        min = sum(self.tiles[x][z][y])
                         coordsofmin = [(x,y,z)]
-                    elif not self.tiles[x][z][y].isCollapse() and self.tiles[x][z][y].nb_superpositions() == min:
+                    elif sum(self.tiles[x][z][y]) > 1 and sum(self.tiles[x][z][y]) == min:
                         coordsofmin.append((x,y,z))
 
-        if len(coordsofmin) == 0:
+        if not coordsofmin:
             return None
         return coordsofmin[random.randint(0, len(coordsofmin)-1)]
+
+    def collapse(self, x, y, z):
+        # exit if tile is collapsed
+        if(sum(self.tiles[x][z][y]) <= 1):
+            return
+        
+        # force collapse on the given coord 
+        superposition = random.randint(0, self.nb_superpositions - 1)
+        while not self.tiles[x][z][y][superposition]:
+            superposition = random.randint(0, self.nb_superpositions - 1)
+
+        self.tiles[x][z][y] = [False for i in range (self.nb_superpositions)]
+        self.tiles[x][z][y][superposition] = True
+
+        for n in self.neighbours_of_coords(x, y, z):
+            self.refresh_tile(n)
 
     def solve(self):
         #take a random key of the grid
         co_x = random.randint(0, MAX_XZ_STAD - 1)
-        co_y = 0
-        if self.blockSet.dimensions == 3:
-            co_y = random.randint(0, Y_MAX - 1)
+        co_y = random.randint(0, Y_MAX - 1) if self.blockSet.dimensions == 3 else 0
         co_z = random.randint(0, MAX_XZ_STAD - 1)
+
         coord = (co_x, co_y, co_z)
 
         while coord is not None:
@@ -161,19 +154,27 @@ class Stadium:
             self.collapse(co_x, co_y, co_z)
             coord = self.find_lowest_superposition()
 
+    def toObj(self,blockname):
+        return {
+            'b': blockname.split('_')[0].split('.')[0],
+            'd': blockname.split('_')[1],
+            'v': None, 'c': 0, 'm': 'Normal'
+        }
+
     def toJson(self):
         list = []
         t = None
-        y_2d_build = Y_AXIS_FOR_2D + 9
+        y_2d_build = Y_AXIS_GROUND_LVL + 9
+        all_blockset_blocks = self.blockSet.get_all_blocks()
 
         for x in range(MAX_XZ_STAD):
             for z in range(MAX_XZ_STAD):
                 for y in range(self.y_max):
                     if not(x < 0 or z >= MAX_XZ_STAD):
-                        t = self.tiles[x][z][y].toObj()
+                        t = self.toObj(self.all_blocks[[i for i, c in enumerate(self.tiles[x][z][y]) if c][0]])
                         if not t['b'] == "":
                             if self.blockSet.dimensions == 3:
-                                t['v'] = (x, y*2, z)
+                                t['v'] = (x, y*2 + Y_AXIS_GROUND_LVL, z)
                             else:
                                 t['v'] = (x, y_2d_build, z)
                             list.append(t)

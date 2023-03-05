@@ -8,7 +8,7 @@ from models.Block import Block
 from models.BlockSet import BlockSet
 from models.Stadium import Stadium
 
-sys.setrecursionlimit(2000)
+sys.setrecursionlimit(4000) #there is propably to many recursion
 
 blockSetList = {}
 
