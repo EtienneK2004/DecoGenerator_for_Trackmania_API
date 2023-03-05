@@ -1,6 +1,6 @@
 import json
 import random
-from time import sleep
+from time import sleep,time
 import sys
 
 import models.Block
@@ -8,7 +8,7 @@ from models.Block import Block
 from models.BlockSet import BlockSet
 from models.Stadium import Stadium
 
-sys.setrecursionlimit(4000) #there is propably to many recursion
+sys.setrecursionlimit(10000) #there is propably to many recursion
 
 blockSetList = {}
 
@@ -34,20 +34,26 @@ TODO :
 
 """
 def run(nameofset, args = None):
+    metric_start = time()
     loadBlockSetList()
     set = blockSetList[nameofset]
     if set is None:
        return "No set found."
+    print(">> WFC >> Loading BlockSetList : "  + str(time() - metric_start))
 
+    metric_start = time()
     stadium = Stadium(set)
+    print(">> WFC >> Init Stadium grid : "  + str(time() - metric_start))
 
+    metric_start = time()
     stadium.solve()
+    print(">> WFC >> Solving Stadium : "  + str(time() - metric_start))
     return stadium.toJson()
 
 
 
 ### for local testing
-#print("start")
+print("start")
 #print(run("GrassMountains"))
 #print(run("GrassRoad"))
-#print("fin")
+print("fin")

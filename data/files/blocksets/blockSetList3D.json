@@ -1,12 +1,6 @@
 [
 
 
-    {
-        "name": "zztest",
-        "dimensions": 1,
-        "blocks": []
-
-    },
 
 
     {
@@ -16,105 +10,99 @@
             {
                 "name": "DecoPlatformBase",
                 "weight": 400,
-                "0":"grass",
-                "1": "grass",
-                "2":"grass",
-                "3": "grass"
+                "sockets":["grass","grass","grass","grass"]
             },
 
             {
                 "name": "OpenTechRoadStraight",
                 "weight": 100,
-                "0":"opentech",
-                "1": "grass",
-                "2":"opentech",
-                "3": "grass"
+                "sockets":["opentech",
+                 "grass",
+                "opentech",
+                "grass"]
 
             },
 
             {
                 "name": "OpenTechRoadCurve1",
                 "weight": 100,
-                "0":"opentech",
-                "1": "opentech",
-                "2":"grass",
-                "3": "grass"
+                "sockets":["opentech","opentech","grass", "grass"]
 
             },
             {
                 "name": "OpenTechRoadToZoneCenter",
                 "weight": 10,
-                "0":"opentech",
-                "1": "opentechright",
-                "2":"zonetech",
-                "3": "opentechleft"
+                "sockets":["opentech",
+                 "opentechright",
+                "zonetech",
+                 "opentechleft"]
 
             },
 
             {
                 "name": "OpenTechRoadToZoneLeft",
                 "weight": 10,
-                "0":"opentech",
-                "1": "grass",
-                "2":"opentechright",
-                "3": "opentechleft"
+                "sockets":["opentech",
+                 "grass",
+                "opentechright",
+                 "opentechleft"]
 
             },
 
             {
                 "name": "OpenTechRoadToZoneRight",
                 "weight": 10,
-                "0":"opentech",
-                "1": "opentechright",
-                "2":"opentechleft",
-                "3": "grass"
+                "sockets":["opentech",
+                 "opentechright",
+                "opentechleft",
+                 "grass"]
 
             },
 
             {
                 "name": "OpenTechZoneCurve1Out",
                 "weight": 10,
-                "0":"opentechright",
-                "1": "opentechleft",
-                "2":"grass",
-                "3": "grass"
+                "sockets":["opentechright",
+                 "opentechleft",
+                "grass",
+                 "grass"]
 
             },
 
             {
                 "name": "OpenTechZoneCurve1In",
                 "weight": 10,
-                "0":"opentechleft",
-                "1": "opentechright",
-                "2":"zonetech",
-                "3": "zonetech"
+                "sockets":["opentechleft",
+                 "opentechright",
+                "zonetech",
+                 "zonetech"]
 
             },
             {
                 "name": "OpenTechZoneStraight",
                 "weight": 10,
-                "0":"opentechleft",
-                "1": "grass",
-                "2":"opentechright",
-                "3": "zonetech"
+                "sockets":["opentechleft",
+                 "grass",
+                "opentechright",
+                 "zonetech"]
 
             },
             {
                 "name": "OpenTechZoneBase5",
                 "weight": 1,
-                "0":"opentechleft",
-                "1": "opentechright",
-                "2":"opentechleft",
-                "3": "opentechright"
+                "sockets":["opentechleft",
+                 "opentechright",
+                "opentechleft",
+                 "opentechright"]
 
             },
             {
                 "name": "PlatformTechBase",
                 "weight": 10,
-                "0":"zonetech",
-                "1": "zonetech",
-                "2":"zonetech",
-                "3": "zonetech"
+                "sockets":["zonetech",
+                 "zonetech",
+                "zonetech",
+                 "zonetech"]
 
             }
         ],
@@ -134,10 +122,10 @@
             {
                 "name": "DecoPlatformBase",
                 "weight": 30,
-                "0":"grass",
-                "1": "grass",
-                "2":"grass",
-                "3": "grass",
+                "sockets":["grass",
+                 "grass",
+                "grass",
+                 "grass"],
                 "top": "",
                 "bottom": "wall"
             },
@@ -145,50 +133,50 @@
             {
                 "name": "DecoHillSlope2Straight",
                 "weight": 8,
-                "0":"wall",
-                "1": "slopewall1right",
-                "2":"semigrass",
-                "3": "slopewall1left",
+                "sockets":["wall",
+                 "slopewall1right",
+                "semigrass",
+                 "slopewall1left"],
                 "top": "",
                 "bottom": "wall"
             },
             {
                 "name": "DecoHillSlope2Curve1In",
                 "weight": 1,
-                "0":"slopewall1right",
-                "1": "slopewall1left",
-                "2":"wall",
-                "3": "wall",
+                "sockets":["slopewall1right",
+                 "slopewall1left",
+                "wall",
+                 "wall"],
                 "top": "",
                 "bottom": "wall"
             },
             {
                 "name": "DecoHillSlope2Curve1Out",
                 "weight": 4,
-                "0":"slopewall1left",
-                "1": "slopewall1right",
-                "2":"semigrass",
-                "3": "semigrass",
+                "sockets":["slopewall1left",
+                 "slopewall1right",
+                "semigrass",
+                 "semigrass"],
                 "top": "",
                 "bottom": "wall"
             },
             {
                 "name": ".wall",
                 "weight": 4,
-                "0":"wall",
-                "1": "wall",
-                "2":"wall",
-                "3": "wall",
+                "sockets":["wall",
+                 "wall",
+                "wall",
+                 "wall"],
                 "top": "wall",
                 "bottom": "wall"
             },
             {
                 "name": "",
                 "weight" : 1,
-                "0":"",
-                "1": "",
-                "2":"",
-                "3": "",
+                "sockets":["",
+                 "",
+                "",
+                 ""],
                 "top": "",
                 "bottom": ""
             }

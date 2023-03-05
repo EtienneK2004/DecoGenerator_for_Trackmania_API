@@ -12,18 +12,20 @@ Y_MAX = 9 # max height of the build
 # return the direction between to first coords and the second
 def dir_from_coords(basecoords, x, y, z):
     if basecoords[0] < x:
-        return "3"
+        return 3
     if basecoords[1] < y:
         return "Top"
     if basecoords[2] < z:
-        return "0"
+        return 0
     if basecoords[0] > x:
-        return "1"
+        return 1
     if basecoords[1] > y:
         return "Bottom"
-    return "2"
+    return 2
 
-
+def opposite_dir(dir):
+    dirs = [0, 1, 'Top', 2, 3, 'Bottom']
+    return dirs[(dirs.index(dir)+3)%6]
 
 
 class Stadium:
@@ -37,7 +39,7 @@ class Stadium:
         self.tiles = []
         self.blockSet = BlockSet
         self.nb_superpositions = len(self.blockSet.get_all_blocks())
-        self.all_blocks = self.blockSet.get_all_blocknames()
+        self.all_blocks = self.blockSet.get_all_blocks()
 
         if(self.blockSet.dimensions == 3):
             self.y_max = Y_MAX
@@ -68,14 +70,38 @@ class Stadium:
 
         return listn
 
-    def can_Block_be_at_Direction_of_Tile(self, blockname, dir, coords):
+    def can_Block_be_at_Direction_of_Tile(self, index, dir, coords):
         x,y,z = coords[0],coords[1],coords[2]
+        #print("can_Block_be_at_Direction_of_Tile")
+        #print(coords)
+        #print(self.all_blocks[index].name)
 
+        #les possibilites du voisin du voisin
         poss = [b for b, c in enumerate(self.tiles[x][z][y]) if c ]
 
+        #TODO check for top and bottom matching
+
+        # if one of the superposition of the coord tiles has a matching socket with the block given, we return true
         for b in poss:
-            if blockname in self.blockSet.possible_blocks_near(self.all_blocks[b], dir): #TODO :check values
+            """print("poss? :" + self.all_blocks[b].name + " dir : " + str(dir))
+            print(self.all_blocks[b].sockets[dir]) #OUI
+            print(self.all_blocks[index].sockets[opposite_dir(dir)].friends)
+            print("OR")
+            print(self.all_blocks[b].sockets)
+            print(self.all_blocks[index].sockets[dir])"""
+
+            if(dir == "Top"):
+                if(self.all_blocks[b].top in self.all_blocks[index].bottom.friends):
+                    return True
+            elif(dir == "Bottom"):
+                if(self.all_blocks[b].bottom in self.all_blocks[index].top.friends):
+                    return True
+            elif(self.all_blocks[b].sockets[dir] in self.all_blocks[index].sockets[opposite_dir(dir)].friends):
                 return True
+            #elif(self.all_blocks[index].sockets[opposite_dir(dir)] in self.all_blocks[b].sockets[dir].friends):
+            #    return True
+            #if self.all_blocks[index].name + "_" + str(self.all_blocks[index].rotation) in self.blockSet.possible_blocks_near(self.all_blocks[b], dir): #TODO :check values and dont use string
+            #    return True
 
         return False
 
@@ -91,10 +117,13 @@ class Stadium:
             keep = True
             idir = 2
             for n in self.neighbours_of_coords(x,y,z):
-                if not self.can_Block_be_at_Direction_of_Tile(self.all_blocks[superpos], dir_from_coords(n, x,y,z), n): # can place superposition by dir #TODO check le truc #block index can be given to the function
+                #print("frist voisin")
+                #print(n)
+                if not self.can_Block_be_at_Direction_of_Tile(superpos, dir_from_coords(n, x,y,z), n): # can place superposition by dir #TODO check le truc #block index can be given to the function
                     keep = False
                     change = True
                     break
+                #raise("stop")
 
             if not keep:
                 disables.append(superpos)
@@ -139,6 +168,8 @@ class Stadium:
         self.tiles[x][z][y][superposition] = True
 
         for n in self.neighbours_of_coords(x, y, z):
+            #print("refresh n")
+            #print(n)
             self.refresh_tile(n)
 
     def solve(self):
@@ -148,16 +179,17 @@ class Stadium:
         co_z = random.randint(0, MAX_XZ_STAD - 1)
 
         coord = (co_x, co_y, co_z)
+        #coord = (0,0,0)
 
         while coord is not None:
             co_x, co_y, co_z = coord[0], coord[1], coord[2] # TODO : change that
             self.collapse(co_x, co_y, co_z)
             coord = self.find_lowest_superposition()
 
-    def toObj(self,blockname):
+    def toObj(self,block):
         return {
-            'b': blockname.split('_')[0].split('.')[0],
-            'd': blockname.split('_')[1],
+            'b': block.name,
+            'd': block.rotation,
             'v': None, 'c': 0, 'm': 'Normal'
         }
 
@@ -171,7 +203,7 @@ class Stadium:
             for z in range(MAX_XZ_STAD):
                 for y in range(self.y_max):
                     if not(x < 0 or z >= MAX_XZ_STAD):
-                        t = self.toObj(self.all_blocks[[i for i, c in enumerate(self.tiles[x][z][y]) if c][0]])
+                        t = self.toObj(all_blockset_blocks[[i for i, c in enumerate(self.tiles[x][z][y]) if c][0]])
                         if not t['b'] == "":
                             if self.blockSet.dimensions == 3:
                                 t['v'] = (x, y*2 + Y_AXIS_GROUND_LVL, z)
