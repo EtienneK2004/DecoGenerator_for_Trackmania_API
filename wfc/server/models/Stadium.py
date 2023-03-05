@@ -3,7 +3,7 @@ import json
 from models.Tile import Tile
 
 # for all generation
-MAX_XZ_STAD = 10 # size on x + z
+MAX_XZ_STAD = 48 # size on x + z
 
 # for 2D
 Y_AXIS_FOR_2D = 1 # ground level for 2 dimension blockset only
@@ -30,22 +30,24 @@ def dir_from_coords(basecoords, x, y, z):
 
 
 class Stadium:
-    tiles = None # Key is a tuple of 3 int (coordinates) # now its a 2 or 3d array. The tm covertion is at the render
+    tiles = None # 3d array. The tm covertion is at the render for Y Axis
     blockSet = None
+    y_max = 1
+    nb_superpositions = 0
 
     def __init__(self, BlockSet):
         self.tiles = []
         self.blockSet = BlockSet
-        y_max = 1
-        if(self.blockSet.dimensions == 3):
-            y_max = Y_MAX
+        self.nb_superpositions = len(self.blockSet.get_all_blocks())
 
-        self.tiles = [[[Tile(self.blockSet.get_all_blocknames()) for y in range(y_max)] for z in range(MAX_XZ_STAD)] for x in range(MAX_XZ_STAD)]
+        if(self.blockSet.dimensions == 3):
+            self.y_max = Y_MAX
+
+        self.tiles = [[[Tile(self.blockSet.get_all_blocknames()) for y in range(self.y_max)] for z in range(MAX_XZ_STAD)] for x in range(MAX_XZ_STAD)]
 
 
     def is_coords_out_of_stadium(self, coords):
-        return coords[0] > (MAX_XZ_STAD-1) or coords[1] >= Y_MAX or coords[2] > (MAX_XZ_STAD-1) or coords[0] < 0 or coords[1] < 0 or coords[2] < 0 #TODO : check if coords[1] < 0 is useful
-        #return coords[0] > (MAX_XZ_STAD-1) or coords[1] >= Y_MAX+9 or coords[2] > (MAX_XZ_STAD-1) or coords[0] < 0 or coords[1] < 9 or coords[2] < 0
+        return coords[0] > (MAX_XZ_STAD-1) or coords[1] >= Y_MAX or coords[2] > (MAX_XZ_STAD-1) or coords[0] < 0 or coords[1] < 0 or coords[2] < 0
 
 
     def get_superpositions(self, x, y, z):
@@ -127,23 +129,14 @@ class Stadium:
             for n in self.neighbours_of_coords(x,y,z):
                 self.refresh_tile(n)
 
-    def find_lowest_superposition(self):
-        min = len(self.blockSet.get_all_blocks()) #todo store the len
-        coordsofmin = []
-        #k = list(self.tiles.keys())
-        return self.find_lowest_superposition_of_list()
 
-    def find_lowest_superposition_of_list(self):
-        min = len(self.blockSet.get_all_blocks()) #todo store the len
+    def find_lowest_superposition(self):
+        min = self.nb_superpositions
         coordsofmin = [] #contain a list of tuple that represent the coord of all tiles with the lowest superposition possibility
-        #k = coordsList
-        y_max = 1
-        if(self.blockSet.dimensions == 3):
-            y_max = Y_MAX #TODO store
 
         for x in range(MAX_XZ_STAD):
             for z in range(MAX_XZ_STAD):
-                for y in range(y_max):
+                for y in range(self.y_max):
                     if not self.tiles[x][z][y].isCollapse() and self.tiles[x][z][y].nb_superpositions() < min:
                         min = self.tiles[x][z][y].nb_superpositions()
                         coordsofmin = [(x,y,z)]
@@ -171,22 +164,19 @@ class Stadium:
     def toJson(self):
         list = []
         t = None
-        y_max = 1
-        if(self.blockSet.dimensions == 3):
-            y_max = Y_MAX #Store
+        y_2d_build = Y_AXIS_FOR_2D + 9
 
         for x in range(MAX_XZ_STAD):
             for z in range(MAX_XZ_STAD):
-                for y in range(y_max):
+                for y in range(self.y_max):
                     if not(x < 0 or z >= MAX_XZ_STAD):
                         t = self.tiles[x][z][y].toObj()
                         if not t['b'] == "":
                             if self.blockSet.dimensions == 3:
-                                t['v'] = (x, y*2, z) #t['v'] = (coords[0], coords[1]*2-9, coords[2])
+                                t['v'] = (x, y*2, z)
                             else:
-                                t['v'] = (x, Y_AXIS_FOR_2D + 9, z) #TODO store Y
+                                t['v'] = (x, y_2d_build, z)
                             list.append(t)
 
         return json.dumps(list)
-        #return json.dumps({"JsonBlocks": list})
 
