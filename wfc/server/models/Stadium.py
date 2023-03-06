@@ -2,7 +2,7 @@ import random
 import json
 
 # for all generation
-MAX_XZ_STAD = 48 # size on x + z
+MAX_XZ_STAD = 3 # size on x + z
 Y_AXIS_GROUND_LVL = 10 # ground level for 2 dimension blockset only
 
 # for 3D
@@ -14,17 +14,17 @@ def dir_from_coords(basecoords, x, y, z):
     if basecoords[0] < x:
         return 3
     if basecoords[1] < y:
-        return "Top"
+        return 4 #"Top"
     if basecoords[2] < z:
         return 0
     if basecoords[0] > x:
         return 1
     if basecoords[1] > y:
-        return "Bottom"
+        return 5 #"Bottom"
     return 2
 
 def opposite_dir(dir):
-    dirs = [0, 1, 'Top', 2, 3, 'Bottom']
+    dirs = [0, 1, 4, 2, 3, 5]
     return dirs[(dirs.index(dir)+3)%6]
 
 
@@ -90,10 +90,10 @@ class Stadium:
             print(self.all_blocks[b].sockets)
             print(self.all_blocks[index].sockets[dir])"""
 
-            if(dir == "Top"):
+            if(dir == 4):
                 if(self.all_blocks[b].top in self.all_blocks[index].bottom.friends):
                     return True
-            elif(dir == "Bottom"):
+            elif(dir == 5):
                 if(self.all_blocks[b].bottom in self.all_blocks[index].top.friends):
                     return True
             elif(self.all_blocks[b].sockets[dir] in self.all_blocks[index].sockets[opposite_dir(dir)].friends):
