@@ -2,8 +2,8 @@ import random
 import json
 
 # for all generation
-MAX_XZ_STAD = 3 # size on x + z
-Y_AXIS_GROUND_LVL = 10 # ground level for 2 dimension blockset only
+MAX_XZ_STAD = 48 # size on x + z
+Y_AXIS_GROUND_LVL = 20 # ground level for 2 dimension blockset only
 
 # for 3D
 Y_MAX = 9 # max height of the build
@@ -30,6 +30,7 @@ def opposite_dir(dir):
 
 class Stadium:
     tiles = None # 3d array. The tm covertion is at the render for Y Axis
+    tiles_poss = None
     blockSet = None
     all_blocks = None
     y_max = 1
@@ -37,6 +38,7 @@ class Stadium:
 
     def __init__(self, BlockSet):
         self.tiles = []
+        self.tiles_poss = []
         self.blockSet = BlockSet
         self.nb_superpositions = len(self.blockSet.get_all_blocks())
         self.all_blocks = self.blockSet.get_all_blocks()
@@ -45,6 +47,7 @@ class Stadium:
             self.y_max = Y_MAX
 
         self.tiles = [[[[True for i in range(self.nb_superpositions)] for y in range(self.y_max)] for z in range(MAX_XZ_STAD)] for x in range(MAX_XZ_STAD)]
+        self.tiles_poss = [[[self.nb_superpositions for y in range(self.y_max)] for z in range(MAX_XZ_STAD)] for x in range(MAX_XZ_STAD)]
 
     def is_coords_out_of_stadium(self, coords):
         return coords[0] > (MAX_XZ_STAD-1) or coords[1] >= self.y_max or coords[2] > (MAX_XZ_STAD-1) or coords[0] < 0 or coords[1] < 0 or coords[2] < 0
@@ -132,6 +135,7 @@ class Stadium:
         if change and disables : #TODO check if change can be removed
             for disable in disables:
                 self.tiles[x][z][y][disable] = False
+                self.tiles_poss[x][z][y] -= 1
             for n in self.neighbours_of_coords(x,y,z):
                 self.refresh_tile(n)
 
@@ -142,13 +146,12 @@ class Stadium:
         for x in range(MAX_XZ_STAD):
             for z in range(MAX_XZ_STAD):
                 for y in range(self.y_max):
-                    if sum(self.tiles[x][z][y]) > 1 and sum(self.tiles[x][z][y]) < min: #TODO : probably optimise sum and collapse
-                        #>>> a = [True, False, True]
-                        #>>> sum(a) -> output : 2
-                        min = sum(self.tiles[x][z][y])
-                        coordsofmin = [(x,y,z)]
-                    elif sum(self.tiles[x][z][y]) > 1 and sum(self.tiles[x][z][y]) == min:
-                        coordsofmin.append((x,y,z))
+                    if self.tiles_poss[x][z][y] > 1 :
+                        if self.tiles_poss[x][z][y] < min: 
+                            min = self.tiles_poss[x][z][y]
+                            coordsofmin = [(x,y,z)]
+                        elif self.tiles_poss[x][z][y] == min:
+                            coordsofmin.append((x,y,z))
 
         if not coordsofmin:
             return None
@@ -156,7 +159,7 @@ class Stadium:
 
     def collapse(self, x, y, z):
         # exit if tile is collapsed
-        if(sum(self.tiles[x][z][y]) <= 1):
+        if(self.tiles_poss[x][z][y] <= 1):
             return
         
         # force collapse on the given coord 
@@ -166,6 +169,7 @@ class Stadium:
 
         self.tiles[x][z][y] = [False for i in range (self.nb_superpositions)]
         self.tiles[x][z][y][superposition] = True
+        self.tiles_poss[x][z][y] = 1
 
         for n in self.neighbours_of_coords(x, y, z):
             #print("refresh n")
