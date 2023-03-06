@@ -1,9 +1,10 @@
 import random
 import json
+from time import time
 
 # for all generation
 MAX_XZ_STAD = 48 # size on x + z
-Y_AXIS_GROUND_LVL = 20 # ground level for 2 dimension blockset only
+Y_AXIS_GROUND_LVL = 10 # ground level for 2 dimension blockset only
 
 # for 3D
 Y_MAX = 9 # max height of the build
@@ -18,19 +19,14 @@ def dir_from_coords(basecoords, x, y, z):
     if basecoords[2] < z:
         return 0
     if basecoords[0] > x:
-        return 1
+        return 2
     if basecoords[1] > y:
         return 5 #"Bottom"
-    return 2
-
-def opposite_dir(dir):
-    dirs = [0, 1, 4, 2, 3, 5]
-    return dirs[(dirs.index(dir)+3)%6]
-
+    return 1
 
 class Stadium:
-    tiles = None # 3d array. The tm covertion is at the render for Y Axis
-    tiles_poss = None
+    tiles = None # 3d array of list of nb_superpositions Boolean set to True. the tm Y Axis is added in toJson()
+    tiles_poss = None # 3d array of the number of possibilities per tiles (basicaly a sum(tiles[x][z][y])).
     blockSet = None
     all_blocks = None
     y_max = 1
@@ -75,9 +71,6 @@ class Stadium:
 
     def can_Block_be_at_Direction_of_Tile(self, index, dir, coords):
         x,y,z = coords[0],coords[1],coords[2]
-        #print("can_Block_be_at_Direction_of_Tile")
-        #print(coords)
-        #print(self.all_blocks[index].name)
 
         #les possibilites du voisin du voisin
         poss = [b for b, c in enumerate(self.tiles[x][z][y]) if c ]
@@ -85,26 +78,10 @@ class Stadium:
         #TODO check for top and bottom matching
 
         # if one of the superposition of the coord tiles has a matching socket with the block given, we return true
+        op_dir = dir + 1 if dir%2 == 0 else dir - 1
         for b in poss:
-            """print("poss? :" + self.all_blocks[b].name + " dir : " + str(dir))
-            print(self.all_blocks[b].sockets[dir]) #OUI
-            print(self.all_blocks[index].sockets[opposite_dir(dir)].friends)
-            print("OR")
-            print(self.all_blocks[b].sockets)
-            print(self.all_blocks[index].sockets[dir])"""
-
-            if(dir == 4):
-                if(self.all_blocks[b].top in self.all_blocks[index].bottom.friends):
-                    return True
-            elif(dir == 5):
-                if(self.all_blocks[b].bottom in self.all_blocks[index].top.friends):
-                    return True
-            elif(self.all_blocks[b].sockets[dir] in self.all_blocks[index].sockets[opposite_dir(dir)].friends):
+            if(self.all_blocks[b].sockets[dir] in self.blockSet.listSockets[self.all_blocks[index].sockets[op_dir]]):
                 return True
-            #elif(self.all_blocks[index].sockets[opposite_dir(dir)] in self.all_blocks[b].sockets[dir].friends):
-            #    return True
-            #if self.all_blocks[index].name + "_" + str(self.all_blocks[index].rotation) in self.blockSet.possible_blocks_near(self.all_blocks[b], dir): #TODO :check values and dont use string
-            #    return True
 
         return False
 
@@ -112,27 +89,21 @@ class Stadium:
         x,y,z = coords3D[0],coords3D[1],coords3D[2]
         # For each superposition, keep it if all neighbours have a superposition allowing it
         # If a change was made, refresh neighbours
-        keeps = []
         disables = []
-        change = False
         superpos_index = [ superpos for superpos, c in enumerate(self.tiles[x][z][y]) if c ]
         for superpos in superpos_index: #superpos is only indexes of True superpositions
             keep = True
             idir = 2
             for n in self.neighbours_of_coords(x,y,z):
-                #print("frist voisin")
-                #print(n)
                 if not self.can_Block_be_at_Direction_of_Tile(superpos, dir_from_coords(n, x,y,z), n): # can place superposition by dir #TODO check le truc #block index can be given to the function
                     keep = False
-                    change = True
                     break
-                #raise("stop")
 
             if not keep:
                 disables.append(superpos)
 
         # remove all not possible superposition
-        if change and disables : #TODO check if change can be removed
+        if disables :
             for disable in disables:
                 self.tiles[x][z][y][disable] = False
                 self.tiles_poss[x][z][y] -= 1
@@ -172,8 +143,6 @@ class Stadium:
         self.tiles_poss[x][z][y] = 1
 
         for n in self.neighbours_of_coords(x, y, z):
-            #print("refresh n")
-            #print(n)
             self.refresh_tile(n)
 
     def solve(self):
@@ -198,6 +167,7 @@ class Stadium:
         }
 
     def toJson(self):
+        metric_start = time()
         list = []
         t = None
         y_2d_build = Y_AXIS_GROUND_LVL + 9
@@ -215,5 +185,6 @@ class Stadium:
                                 t['v'] = (x, y_2d_build, z)
                             list.append(t)
 
+        print(">> WFC >> toJson : "  + str(time() - metric_start))
         return json.dumps(list)
 

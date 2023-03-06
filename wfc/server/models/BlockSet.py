@@ -1,54 +1,50 @@
 import random
 from models.Block import Block
-from models.Socket import Socket
 
 class BlockSet:
     listBlocks = None
-    listSockets = None
+    listSockets = None #dict of socket_id pointing friends socket_id { 0 : [1,2]}
     name = ""
     dimensions = 0
     def __init__(self, BlockSetJson):
         self.listBlocks = []
+        listSocketNames = {} #dict of socket_name pointing socket_id { "socketname" : 0}
         self.listSockets = {}
         self.name = BlockSetJson['name']
         self.dimensions = BlockSetJson['dimensions']
 
         #Sockets
+        i = 0
         for k in BlockSetJson['sockets'].keys():
-            self.listSockets[k] = Socket(k)
+            listSocketNames[k] = i
+            i += 1
         
         #Sockets Friends
-        for s_id in self.listSockets:
-            friends = BlockSetJson['sockets'][s_id]
-            for f_id in friends:
-                self.listSockets[s_id].addFriend(self.listSockets[f_id])
-
-        rotations = [0, 1, 2, 3]
-        weight = 0
-        name = ""
+        for s_name, s_id in listSocketNames.items():
+            friends = BlockSetJson['sockets'][s_name]
+            self.listSockets[s_id] = []
+            for f_name in friends:
+                self.listSockets[s_id].append(listSocketNames[f_name])
 
         for b in BlockSetJson['blocks']:
             friends = []
             
             block = Block(b['name'], b['weight'], 0)
-            for f_id in b['sockets']: #frist is north, second is east ...
-                block.addSocket(self.listSockets[f_id])
+            for f_name in b['sockets']: #frist is north, second is east ...
+                block.addSocket(listSocketNames[f_name])
+            block.reorderSockets()
             if self.dimensions > 2:
-                block.setTopSocket(self.listSockets[b['top']])
-                block.setBottomSocket(self.listSockets[b['bottom']])
+                block.addSocket(listSocketNames[b['top']])
+                block.addSocket(listSocketNames[b['bottom']])
             self.listBlocks.append(block)
 
             #get the 3 rotations
-            next_block_rotation = block.getBlockNextRotation()
+            next_block_rotation = block.getBlockNextRotation(self.dimensions)
             self.listBlocks.append(next_block_rotation)
-            next_block_rotation = next_block_rotation.getBlockNextRotation()
+            next_block_rotation = next_block_rotation.getBlockNextRotation(self.dimensions)
             self.listBlocks.append(next_block_rotation)
-            next_block_rotation = next_block_rotation.getBlockNextRotation()
+            next_block_rotation = next_block_rotation.getBlockNextRotation(self.dimensions)
             self.listBlocks.append(next_block_rotation)
-
-            #for d in rotations:
-            #    self.listBlocks.append(Block(b, d, BlockSetJson))
-
 
     def get_random_block(self, listOfBlocknames):
         listWeight = []
@@ -65,20 +61,8 @@ class BlockSet:
             if r <= cptW:
                 return block[0]
 
-
-
     def get_all_blocks(self):
         return self.listBlocks
-        #return self.listBlocks.values()
-
-    def get_all_blocknames(self):
-        return [ block.name for block in self.get_all_blocks()]
-
-    def possible_blocks_near(self, block, dir, basedir=None):
-        if basedir is None:
-            return block.possibleBlocks[dir]
-            #return self.listBlocks[blockname].possibleBlocks[dir]
-
 
     def get_name(self):
         return self.name
