@@ -6,6 +6,8 @@
     {
         "name": "GrassRoad",
         "dimensions": 2,
+        "heightStep": 1,
+        "mode" : "Normal",
         "blocks":[
             {
                 "name": "DecoPlatformBase",
@@ -118,6 +120,8 @@
     {
         "name": "GrassMountains",
         "dimensions": 3,
+        "heightStep": 2,
+        "mode" : "Normal",
         "blocks": [
             {
                 "name": "DecoPlatformBase",
@@ -188,13 +192,91 @@
             "wall": ["wall"],
             "grass": ["grass", "", "semigrass"],
             "semigrass": ["grass"],
-            "slopewall3right": ["slopewall3left"],
-            "slopewall3left":["slopewall3right"],
-            "slopewall2right": ["slopewall2left"],
-            "slopewall2left":["slopewall2right"],
             "slopewall1right": ["slopewall1left"],
             "slopewall1left":["slopewall1right"]
         }
+
+    },
+
+    {
+        "name": "GrassMountainsSmall",
+        "dimensions": 3,
+        "heightStep": 1,
+        "mode" : "Normal",
+        "blocks": [
+            {
+                "name": "DecoPlatformBase",
+                "weight": 30,
+                "sockets":["grass",
+                 "grass",
+                "grass",
+                 "grass"],
+                "top": "",
+                "bottom": "wall"
+            },
+
+            {
+                "name": "DecoPlatformSlopeBase",
+                "weight": 8,
+                "sockets":["wall",
+                 "slopewall1right",
+                "semigrass",
+                 "slopewall1left"],
+                "top": "",
+                "bottom": "wall"
+            },
+            {
+                "name": "DecoPlatformSlopeBaseCurve1InFull",
+                "weight": 1,
+                "sockets":["slopewall1right",
+                 "slopewall1left",
+                "wall",
+                 "wall"],
+                "top": "",
+                "bottom": "wall"
+            },
+            {
+                "name": "DecoPlatformSlopeBaseCurve1OutFull",
+                "weight": 4,
+                "sockets":["slopewall1left",
+                 "slopewall1right",
+                "semigrass",
+                 "semigrass"],
+                "top": "",
+                "bottom": "wall"
+            },
+            {
+                "name": ".wall",
+                "weight": 4,
+                "sockets":["wall",
+                 "wall",
+                "wall",
+                 "wall"],
+                "top": "wall",
+                "bottom": "wall"
+            },
+            {
+                "name": "",
+                "weight" : 1,
+                "sockets":["",
+                 "",
+                "",
+                 ""],
+                "top": "",
+                "bottom": ""
+            }
+
+        ],
+
+        "sockets":{
+            "": ["", "grass"],
+            "wall": ["wall"],
+            "grass": ["grass", "", "semigrass"],
+            "semigrass": ["grass"],
+            "slopewall1right": ["slopewall1left"],
+            "slopewall1left":["slopewall1right"]
+        }
+
 
     }
 

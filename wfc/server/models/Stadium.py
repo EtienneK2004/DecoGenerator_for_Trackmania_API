@@ -3,7 +3,7 @@ import json
 from time import time
 
 # for all generation
-MAX_XZ_STAD = 48 # size on x + z
+MAX_XZ_STAD = 10 # size on x + z
 Y_AXIS_GROUND_LVL = 10 # ground level for 2 dimension blockset only
 
 # for 3D
@@ -163,7 +163,7 @@ class Stadium:
         return {
             'b': block.name,
             'd': block.rotation,
-            'v': None, 'c': 0, 'm': 'Normal'
+            'v': None, 'c': 0, 'm': self.blockSet.mode
         }
 
     def toJson(self):
@@ -177,13 +177,14 @@ class Stadium:
             for z in range(MAX_XZ_STAD):
                 for y in range(self.y_max):
                     if not(x < 0 or z >= MAX_XZ_STAD):
-                        t = self.toObj(all_blockset_blocks[[i for i, c in enumerate(self.tiles[x][z][y]) if c][0]])
-                        if not t['b'] == "":
-                            if self.blockSet.dimensions == 3:
-                                t['v'] = (x, y*2 + Y_AXIS_GROUND_LVL, z)
-                            else:
-                                t['v'] = (x, y_2d_build, z)
-                            list.append(t)
+                        if(self.tiles_poss[x][z][y] > 0):
+                            t = self.toObj(all_blockset_blocks[[i for i, c in enumerate(self.tiles[x][z][y]) if c][0]])
+                            if not t['b'] == "":
+                                if self.blockSet.dimensions == 3:
+                                    t['v'] = (x, (y+1)*self.blockSet.heightStep + Y_AXIS_GROUND_LVL, z)
+                                else:
+                                    t['v'] = (x, y_2d_build, z)
+                                list.append(t)
 
         print(">> WFC >> toJson : "  + str(time() - metric_start))
         return json.dumps(list)

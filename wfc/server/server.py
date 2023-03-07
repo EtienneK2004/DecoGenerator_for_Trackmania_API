@@ -73,6 +73,7 @@ while(True):
     #run WFC
     print(">> run WFC.")
     #result = wfc3d.run("GrassRoad")
+    #result = wfc3d.run("GrassMountains")
     result = wfc3d.run("GrassMountains")
     #time.sleep(10) #fake wfc
 

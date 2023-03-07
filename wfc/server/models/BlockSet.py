@@ -6,12 +6,16 @@ class BlockSet:
     listSockets = None #dict of socket_id pointing friends socket_id { 0 : [1,2]}
     name = ""
     dimensions = 0
+    heightStep = 1
+    mode = "Normal"
     def __init__(self, BlockSetJson):
         self.listBlocks = []
         listSocketNames = {} #dict of socket_name pointing socket_id { "socketname" : 0}
         self.listSockets = {}
         self.name = BlockSetJson['name']
         self.dimensions = BlockSetJson['dimensions']
+        self.heightStep = BlockSetJson['heightStep']
+        self.mode = BlockSetJson['mode']
 
         #Sockets
         i = 0
